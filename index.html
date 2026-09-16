@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PT CPE - Inventory & Purchasing</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #0A0F1A;
+    --surface: #121A2B;
+    --surface2: #182338;
+    --border: #243050;
+    --text: #E7ECF3;
+    --muted: #8896AC;
+    --accent: #2DD4C4;
+    --accent-dim: #173B39;
+    --warn: #E3A73A;
+    --good: #3FBF7F;
+    --danger: #E2635F;
+    --info: #5B8DEF;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  .app { display: flex; min-height: 100vh; }
+  .sidebar { width: 248px; flex-shrink: 0; border-right: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; justify-content: space-between; }
+  .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; padding: 0 4px; }
+  .logo { width: 36px; height: 36px; border-radius: 8px; background: var(--accent); color: #062421; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; }
+  .brand-name { font-size: 13.5px; font-weight: 600; line-height: 1.2; }
+  .brand-sub { font-size: 11px; color: var(--muted); line-height: 1.2; }
+  .nav-section { font-size: 10.5px; font-weight: 600; letter-spacing: 0.03em; color: var(--muted); padding: 16px 10px 6px; }
+  .nav-item { width: 100%; display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 6px; margin-bottom: 2px; background: transparent; border: none; cursor: pointer; color: var(--text); font-size: 13.5px; font-weight: 500; font-family: inherit; text-align: left; }
+  .nav-item:hover { background: var(--surface2); }
+  .nav-item.active { background: var(--accent-dim); color: var(--accent); }
+  .nav-icon { width: 16px; height: 16px; display: flex; flex-shrink: 0; }
+  .nav-icon svg { width: 16px; height: 16px; }
+  .nav-label { flex: 1; }
+  .nav-badge { font-size: 10.5px; font-weight: 600; border-radius: 999px; padding: 1px 6px; background: var(--surface2); color: var(--muted); }
+  .nav-item.active .nav-badge { background: var(--accent); color: #062421; }
+  .sidebar-footer { font-size: 11.5px; line-height: 1.5; color: var(--muted); padding: 0 4px; }
+  .main { flex: 1; min-width: 0; padding: 32px; }
+  .topbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+  #pageTitle { font-size: 22px; font-weight: 600; margin: 0; }
+  #pageSub { font-size: 13px; color: var(--muted); margin: 4px 0 0; }
+  .loading, .error, .empty { padding: 32px; text-align: center; color: var(--muted); font-size: 13px; }
+  .error { color: var(--danger); }
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
+  .p4 { padding: 16px; }
+  .p20 { padding: 20px; }
+  .b-top { border-top: 1px solid var(--border); }
+  .b-bottom { border-bottom: 1px solid var(--border); }
+  .py2 { padding-top: 8px; padding-bottom: 8px; }
+  .mb3 { margin-bottom: 14px; }
+  .grid-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+  .card { padding: 16px; }
+  .card-value { font-size: 24px; font-weight: 600; margin-top: 6px; }
+  .card-value.warn { color: var(--warn); }
+  .card-value.good { color: var(--good); }
+  .card-value.info { color: var(--info); }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-2-info { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .panel-title { font-size: 14.5px; font-weight: 600; display: flex; align-items: center; gap: 8px; margin: 0; }
+  .panel-title svg { width: 15px; height: 15px; color: var(--warn); }
+  .row-between { display: flex; align-items: center; justify-content: space-between; }
+  .row-gap { display: flex; align-items: center; gap: 10px; }
+  .link-btn { background: none; border: none; color: var(--accent); font-size: 12.5px; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 3px; }
+  .icon-sm { width: 14px; height: 14px; display: flex; }
+  .icon-sm svg { width: 14px; height: 14px; }
+  .icon-sm.good { color: var(--good); }
+  .icon-sm.danger { color: var(--danger); }
+  .icon-sm.muted { color: var(--muted); }
+  .fw-medium { font-weight: 500; }
+  .tiny { font-size: 11.5px; }
+  .small { font-size: 13px; }
+  .muted { color: var(--muted); }
+  .warn { color: var(--warn); }
+  .good { color: var(--good); }
+  .danger { color: var(--danger); }
+  .accent { color: var(--accent); }
+  .section-label { font-size: 12px; font-weight: 500; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.02em; }
+  .total-row { padding-top: 12px; margin-top: 4px; border-top: 1px solid var(--border); font-size: 14px; font-weight: 600; }
+  .search-box { display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; max-width: 420px; }
+  .search-box.search-narrow { max-width: 320px; }
+  .search-box svg { width: 15px; height: 15px; color: var(--muted); flex-shrink: 0; }
+  .search-box input { background: transparent; border: none; outline: none; color: var(--text); font-size: 13.5px; font-family: inherit; flex: 1; width: 100%; }
+  .table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .table th { text-align: left; font-weight: 500; font-size: 11.5px; color: var(--muted); padding: 10px 16px; }
+  .table td { padding: 12px 16px; border-top: 1px solid var(--border); vertical-align: top; }
+  .status-dot { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; }
+  .status-dot .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .status-dot.warn { color: var(--warn); } .status-dot.warn .dot { background: var(--warn); }
+  .status-dot.good { color: var(--good); } .status-dot.good .dot { background: var(--good); }
+  .status-dot.danger { color: var(--danger); } .status-dot.danger .dot { background: var(--danger); }
+  .status-dot.muted { color: var(--muted); } .status-dot.muted .dot { background: var(--muted); }
+  .status-dot.info { color: var(--info); } .status-dot.info .dot { background: var(--info); }
+  .btn { display: inline-flex; align-items: center; gap: 6px; border-radius: 6px; font-weight: 500; font-size: 13.5px; font-family: inherit; padding: 8px 14px; cursor: pointer; white-space: nowrap; }
+  .btn svg { width: 15px; height: 15px; }
+  .btn-sm { padding: 6px 10px; font-size: 12.5px; }
+  .btn-sm svg { width: 13px; height: 13px; }
+  .btn-solid { background: var(--accent); color: #062421; border: none; }
+  .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  .btn-danger { background: transparent; color: var(--danger); border: 1px solid #3A1E1E; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(4,7,14,0.65); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 50; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; width: 100%; max-height: 85vh; overflow-y: auto; }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--surface); }
+  .modal-header h3 { font-size: 15px; font-weight: 600; margin: 0; }
+  .icon-btn { background: none; border: none; color: var(--muted); cursor: pointer; padding: 4px; display: flex; }
+  .icon-btn svg { width: 18px; height: 18px; }
+  .modal-body { padding: 20px; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+  .field { margin-bottom: 14px; display: block; }
+  .field label { display: block; font-size: 12.5px; color: var(--muted); margin-bottom: 6px; }
+  .field input, .field select { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 8px 10px; font-size: 13.5px; font-family: inherit; outline: none; }
+  .error-text { font-size: 12.5px; color: var(--danger); margin-bottom: 12px; }
+  .toast { position: fixed; bottom: 24px; right: 24px; z-index: 60; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 12px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.35); max-width: 360px; }
+  .hidden { display: none !important; }
+  @media (max-width: 900px) { .grid-cards { grid-template-columns: 1fr 1fr; } .grid-2 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">CPE</div>
+        <div>
+          <div class="brand-name">PT CPE</div>
+          <div class="brand-sub">Inventory &amp; Purchasing</div>
+        </div>
+      </div>
+      <nav id="nav"></nav>
+      <div class="sidebar-footer">Data tersimpan di Supabase, bisa diakses tim dari mana saja.</div>
+    </aside>
+    <main class="main">
+      <div class="topbar">
+        <div>
+          <h1 id="pageTitle"></h1>
+          <p id="pageSub"></p>
+        </div>
+        <div id="pageAction"></div>
+      </div>
+      <div id="content" class="content"><div class="loading">Memuat data dari Supabase…</div></div>
+    </main>
+  </div>
+  <div id="modalRoot"></div>
+  <div id="toast" class="toast hidden"></div>
+
+<script>
+/* ================= KONFIGURASI SUPABASE ================= */
+const SUPABASE_URL = 'https://yeoaghlebsepmzidwwpa.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inllb2FnaGxlYnNlcG16aWR3d3BhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1MjUwMDUsImV4cCI6MjEwNTEwMTAwNX0.uMrb5UzWMlGBB_HdGpEr_aTE73g8uhW4AiQ-oyLOwvk';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* ================= ICONS ================= */
+const ICONS = {
+  grid: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>',
+  clipboard: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v2H9z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>',
+  file: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 12h6M9 16h6"/></svg>',
+  package: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>',
+  boxes: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/></svg>',
+  book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h11a3 3 0 013 3v13H7a3 3 0 01-3-3z"/><path d="M7 4v13"/></svg>',
+  users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><circle cx="17" cy="9" r="2.6"/><path d="M15.5 14.6c2.6.4 4.5 2.3 4.5 5.4"/></svg>',
+  search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>',
+  upload: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V6"/><path d="M6 11l6-6 6 6"/><path d="M5 21h14"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg>',
+  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l10 18H2z"/><path d="M12 9v5"/></svg>',
+  send: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg>',
+  inbox: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h5l2 3h4l2-3h5"/><path d="M5 4h14l2 8v8H3v-8z"/></svg>',
+  pdf: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 13h1a1.5 1.5 0 010 3H9v-3zm4 0h1.2M13 16v-3"/></svg>',
+};
+
+const NAV = [
+  { section: 'RINGKASAN' },
+  { id: 'dashboard', label: 'Dashboard', icon: 'grid' },
+  { section: 'PROSES PENGADAAN' },
+  { id: 'pr', label: 'Purchase Request', icon: 'clipboard', badgeKey: 'pr' },
+  { id: 'po', label: 'Purchase Order', icon: 'file', badgeKey: 'po' },
+  { id: 'penerimaan', label: 'Penerimaan Gudang', icon: 'package', badgeKey: 'penerimaan' },
+  { section: 'GUDANG & KATALOG' },
+  { id: 'stock', label: 'Stock / Inventory', icon: 'boxes', badgeKey: 'stock' },
+  { id: 'katalog', label: 'Katalog Part', icon: 'book', badgeKey: 'katalog' },
+  { id: 'supplier', label: 'Supplier', icon: 'users' },
+];
+
+const TITLES = {
+  dashboard: ['Dashboard', 'Ringkasan operasional pengadaan & gudang'],
+  pr: ['Purchase Request', 'Permintaan pembelian part dari tiap departemen'],
+  po: ['Purchase Order', 'Pesanan pembelian yang dikirim ke supplier'],
+  penerimaan: ['Penerimaan Gudang', 'Konfirmasi barang masuk dari supplier'],
+  stock: ['Stock / Inventory', 'Saldo stok per part & kartu stok (in-out)'],
+  katalog: ['Katalog Part', 'Master data part & spesifikasi'],
+  supplier: ['Supplier', 'Daftar mitra pemasok sparepart'],
+};
+
+let STATE = null;
+let currentPage = 'dashboard';
+
+document.addEventListener('DOMContentLoaded', loadData);
+
+/* ================= MAPPING DB -> STATE ================= */
+function mapPart(p) {
+  return { Kode: p.kode, Nama: p.nama, Kategori: p.kategori, Lokasi: p.lokasi, Satuan: p.satuan,
+    Stok: Number(p.stok), MinStok: Number(p.min_stok), Harga: Number(p.harga), StatusKatalog: p.status_katalog };
+}
+function mapSupplier(s) { return { ID: s.id, Nama: s.nama, Kontak: s.kontak, Telepon: s.telepon, Kategori: s.kategori }; }
+function mapPR(r) {
+  return { ID: r.id, Tanggal: r.tanggal, DimintaOleh: r.diminta_oleh, Departemen: r.departemen,
+    EquipmentNumber: r.equipment_number, Keterangan: r.keterangan, Status: r.status,
+    Items: (r.purchase_request_items || []).map((it) => ({ kode: it.part_kode, namaItem: it.nama_item, satuan: it.satuan, qty: Number(it.qty) })) };
+}
+function mapPO(r) {
+  return { ID: r.id, Supplier: r.supplier, Tanggal: r.tanggal, Status: r.status,
+    Items: (r.purchase_order_items || []).map((it) => ({ kode: it.part_kode, qty: Number(it.qty), harga: Number(it.harga) })) };
+}
+function mapPGR(r) {
+  return { ID: r.id, PO: r.po_id, Supplier: r.supplier, Tanggal: r.tanggal, Status: r.status,
+    Items: (r.penerimaan_items || []).map((it) => ({ kode: it.part_kode, qty: Number(it.qty) })) };
+}
+function mapLedger(l) { return { Kode: l.part_kode, Tanggal: l.tanggal, Tipe: l.tipe, Qty: Number(l.qty), Ref: l.ref, Saldo: Number(l.saldo) }; }
+
+async function loadData() {
+  try {
+    const [partsRes, suppliersRes, prRes, poRes, pgrRes, ledgerRes] = await Promise.all([
+      sb.from('parts').select('*').order('kode'),
+      sb.from('suppliers').select('*').order('id'),
+      sb.from('purchase_requests').select('*, purchase_request_items(*)').order('created_at', { ascending: false }),
+      sb.from('purchase_orders').select('*, purchase_order_items(*)').order('created_at', { ascending: false }),
+      sb.from('penerimaan').select('*, penerimaan_items(*)').order('id', { ascending: false }),
+      sb.from('ledger').select('*').order('tanggal', { ascending: false }),
+    ]);
+    [partsRes, suppliersRes, prRes, poRes, pgrRes, ledgerRes].forEach((r) => { if (r.error) throw r.error; });
+    STATE = {
+      parts: partsRes.data.map(mapPart),
+      suppliers: suppliersRes.data.map(mapSupplier),
+      pr: prRes.data.map(mapPR),
+      po: poRes.data.map(mapPO),
+      penerimaan: pgrRes.data.map(mapPGR),
+      ledger: ledgerRes.data.map(mapLedger),
+    };
+    normalizeState();
+    renderNav();
+    renderPage();
+  } catch (err) {
+    document.getElementById('content').innerHTML =
+      '<div class="error">Gagal memuat data dari Supabase: ' + escapeHtml(err.message || String(err)) + '</div>';
+  }
+}
+
+function normalizeState() {
+  STATE.parts.forEach((p) => {
+    p.Status = p.StatusKatalog === 'Perlu Ditinjau' ? 'Perlu Ditinjau' : (p.Stok <= p.MinStok ? 'Menipis' : 'Aman');
+  });
+}
+
+function computeBadges() {
+  return {
+    pr: STATE.pr.filter((p) => p.Status === 'Menunggu').length,
+    po: STATE.po.filter((p) => p.Status !== 'Diterima').length,
+    penerimaan: STATE.penerimaan.filter((p) => p.Status === 'Menunggu').length,
+    stock: STATE.parts.filter((p) => p.Status === 'Menipis').length,
+    katalog: STATE.parts.filter((p) => p.StatusKatalog === 'Perlu Ditinjau').length,
+  };
+}
+
+/* ================= HELPERS ================= */
+function rp(n) { return 'Rp' + Math.round(n).toLocaleString('id-ID'); }
+function todayStr() { const d = new Date(); return d.toISOString().slice(0, 10); }
+function fmtDate(d) { const dt = new Date(d); if (isNaN(dt.getTime())) return d; return dt.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }); }
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function genId(prefix) { const year = new Date().getFullYear(); const rand = Math.random().toString(16).slice(2, 6).toUpperCase(); return prefix + '-' + year + '-' + rand; }
+function statusToneClass(status) {
+  if (status === 'Menunggu') return 'warn';
+  if (['Disetujui', 'Diterima', 'Aman', 'Masuk', 'Terverifikasi'].includes(status)) return 'good';
+  if (['Ditolak', 'Keluar'].includes(status)) return 'danger';
+  if (status === 'Perlu Ditinjau') return 'info';
+  return 'muted';
+}
+function statusDot(status) { return '<span class="status-dot ' + statusToneClass(status) + '"><span class="dot"></span>' + escapeHtml(status) + '</span>'; }
+function supplierByKategori(kat) { return STATE.suppliers.find((s) => s.Kategori === kat) || STATE.suppliers[0]; }
+
+let toastTimer;
+function showToast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.borderColor = isError ? 'var(--danger)' : 'var(--border)';
+  t.style.color = isError ? 'var(--danger)' : 'var(--text)';
+  t.classList.remove('hidden');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.add('hidden'), isError ? 4200 : 2600);
+}
+
+function openModal(title, bodyHtml, width) {
+  document.getElementById('modalRoot').innerHTML =
+    '<div class="modal-overlay" onclick="if(event.target===this) closeModal()">' +
+    '<div class="modal" style="max-width:' + (width || 560) + 'px" onclick="event.stopPropagation()">' +
+    '<div class="modal-header"><h3>' + title + '</h3><button class="icon-btn" onclick="closeModal()">' + ICONS.x + '</button></div>' +
+    '<div class="modal-body">' + bodyHtml + '</div></div></div>';
+}
+function closeModal() { document.getElementById('modalRoot').innerHTML = ''; }
+
+/* ================= NAV / ROUTING ================= */
+function go(id) { currentPage = id; renderNav(); renderPage(); }
+
+function renderNav() {
+  const badges = computeBadges();
+  document.getElementById('nav').innerHTML = NAV.map((n) => {
+    if (n.section) return '<div class="nav-section">' + n.section + '</div>';
+    const active = currentPage === n.id;
+    const badge = n.badgeKey ? badges[n.badgeKey] : 0;
+    return '<button class="nav-item ' + (active ? 'active' : '') + '" onclick="go(\'' + n.id + '\')">' +
+      '<span class="nav-icon">' + ICONS[n.icon] + '</span><span class="nav-label">' + n.label + '</span>' +
+      (badge ? '<span class="nav-badge">' + badge + '</span>' : '') + '</button>';
+  }).join('');
+}
+
+function actionButton(icon, label, onclick) { return '<button class="btn btn-solid" onclick="' + onclick + '">' + ICONS[icon] + '<span>' + label + '</span></button>'; }
+
+function renderPage() {
+  document.getElementById('pageTitle').textContent = TITLES[currentPage][0];
+  document.getElementById('pageSub').textContent = TITLES[currentPage][1];
+  const action = document.getElementById('pageAction');
+  action.innerHTML = '';
+  if (currentPage === 'stock') action.innerHTML = actionButton('upload', 'Keluarkan Stock', 'openKeluarModal()');
+  if (currentPage === 'pr') action.innerHTML = actionButton('plus', 'Buat PR', 'openBuatPRModal()');
+  const content = document.getElementById('content');
+  if (currentPage === 'dashboard') content.innerHTML = renderDashboard();
+  else if (currentPage === 'pr') content.innerHTML = renderPRPage();
+  else if (currentPage === 'po') content.innerHTML = renderPOPage();
+  else if (currentPage === 'penerimaan') content.innerHTML = renderPenerimaanPage();
+  else if (currentPage === 'stock') content.innerHTML = renderStockPage();
+  else if (currentPage === 'katalog') content.innerHTML = renderKatalogPage();
+  else if (currentPage === 'supplier') content.innerHTML = renderSupplierPage();
+}
+
+/* ================= DASHBOARD ================= */
+function renderDashboard() {
+  const b = computeBadges();
+  const totalNilai = STATE.parts.reduce((s, p) => s + p.Stok * p.Harga, 0);
+  const cards = [
+    { label: 'Jenis Part Tercatat', value: STATE.parts.length, sub: 'master data aktif' },
+    { label: 'Nilai Total Stok', value: rp(totalNilai), sub: 'estimasi harga beli' },
+    { label: 'Part Stok Menipis', value: b.stock, sub: 'perlu pengajuan PR', tone: b.stock > 0 ? 'warn' : 'good' },
+    { label: 'PR Menunggu Persetujuan', value: b.pr, sub: 'dari departemen' },
+    { label: 'PO Sedang Berjalan', value: b.po, sub: 'belum diterima gudang' },
+    { label: 'Penerimaan Menunggu', value: b.penerimaan, sub: 'belum dikonfirmasi' },
+    { label: 'Part Perlu Ditinjau', value: b.katalog, sub: 'PN baru dari PR, belum diverifikasi', tone: b.katalog > 0 ? 'info' : 'good' },
+  ];
+  const cardHtml = cards.map((c) => '<div class="panel card"><div class="tiny muted">' + c.label + '</div>' +
+    '<div class="card-value mono ' + (c.tone || '') + '">' + c.value + '</div><div class="tiny muted">' + c.sub + '</div></div>').join('');
+
+  const lowStock = STATE.parts.filter((p) => p.Status === 'Menipis').slice(0, 5);
+  const lowStockHtml = lowStock.length ? lowStock.map((p) =>
+    '<div class="row-between b-top py2"><div><div class="fw-medium">' + escapeHtml(p.Nama) + '</div>' +
+    '<div class="tiny muted mono">' + p.Kode + ' · ' + escapeHtml(p.Lokasi || '') + '</div></div>' +
+    '<div class="mono warn">' + p.Stok + ' / ' + p.MinStok + ' ' + escapeHtml(p.Satuan || '') + '</div></div>'
+  ).join('') : '<div class="tiny muted">Tidak ada part yang menipis.</div>';
+
+  const recent = STATE.ledger.slice().sort((a, b) => (a.Tanggal < b.Tanggal ? 1 : -1)).slice(0, 6);
+  const recentHtml = recent.map((r) => {
+    const part = STATE.parts.find((p) => p.Kode === r.Kode);
+    const icon = r.Tipe === 'Masuk' ? ICONS.inbox : r.Tipe === 'Keluar' ? ICONS.upload : ICONS.check;
+    const tone = r.Tipe === 'Masuk' ? 'good' : r.Tipe === 'Keluar' ? 'danger' : 'muted';
+    return '<div class="row-between b-top py2"><div class="row-gap"><span class="icon-sm ' + tone + '">' + icon + '</span>' +
+      '<div><div class="fw-medium small">' + (part ? escapeHtml(part.Nama) : r.Kode) + '</div>' +
+      '<div class="tiny muted">' + r.Tipe + ' · ' + fmtDate(r.Tanggal) + '</div></div></div>' +
+      '<div class="mono small">' + (r.Tipe === 'Keluar' ? '-' : '+') + r.Qty + '</div></div>';
+  }).join('');
+
+  return '<div class="grid-cards">' + cardHtml + '</div><div class="grid-2">' +
+    '<div class="panel p20"><div class="row-between mb3"><h3 class="panel-title">' + ICONS.alert + ' Part Perlu Perhatian</h3>' +
+    '<button class="link-btn" onclick="go(\'stock\')">Lihat semua ›</button></div>' + lowStockHtml + '</div>' +
+    '<div class="panel p20"><h3 class="panel-title mb3">Aktivitas Stok Terbaru</h3>' + recentHtml + '</div></div>';
+}
+
+/* ================= STOCK / INVENTORY ================= */
+function renderStockPage() {
+  return '<div class="panel"><div class="p4 b-bottom"><div class="search-box">' + ICONS.search +
+    '<input id="stockSearch" type="text" placeholder="Cari part, kategori, atau kode..." oninput="renderStockTable()"></div></div>' +
+    '<div id="stockTableWrap">' + renderStockTable(true) + '</div></div>';
+}
+function renderStockTable(returnOnly) {
+  const q = (document.getElementById('stockSearch') && document.getElementById('stockSearch').value || '').toLowerCase();
+  const filtered = STATE.parts.filter((p) => (p.Kode + ' ' + p.Nama + ' ' + (p.Kategori || '')).toLowerCase().includes(q));
+  const rows = filtered.map((p) => '<tr class="b-top"><td class="mono accent">' + p.Kode + '</td>' +
+    '<td class="fw-medium">' + escapeHtml(p.Nama) + '</td><td class="muted">' + escapeHtml(p.Kategori || '-') + '</td>' +
+    '<td class="muted">' + escapeHtml(p.Lokasi || '-') + '</td><td class="mono">' + p.Stok + ' ' + escapeHtml(p.Satuan || '') + '</td>' +
+    '<td class="mono muted">' + p.MinStok + ' ' + escapeHtml(p.Satuan || '') + '</td><td class="mono">' + rp(p.Stok * p.Harga) + '</td>' +
+    '<td>' + statusDot(p.Status) + '</td><td><button class="btn btn-ghost btn-sm" onclick="openKartuModal(\'' + p.Kode + '\')">Kartu Stock</button></td></tr>'
+  ).join('');
+  const table = '<table class="table"><thead><tr>' +
+    ['Kode', 'Nama Part', 'Kategori', 'Lokasi', 'Stok', 'Min. Stok', 'Nilai Stok', 'Status', ''].map((h) => '<th>' + h + '</th>').join('') +
+    '</tr></thead><tbody>' + (rows || '<tr><td colspan="9" class="empty">Tidak ada part yang cocok.</td></tr>') + '</tbody></table>';
+  if (returnOnly) return table;
+  document.getElementById('stockTableWrap').innerHTML = table;
+}
+
+function openKeluarModal() {
+  const options = STATE.parts.map((p) => '<option value="' + p.Kode + '">' + p.Kode + ' — ' + escapeHtml(p.Nama) + ' (stok: ' + p.Stok + ' ' + escapeHtml(p.Satuan || '') + ')</option>').join('');
+  const body = '<div class="field"><label>Part</label><select id="keluarKode" onchange="updateKeluarError()">' + options + '</select></div>' +
+    '<div class="field"><label>Jumlah</label><input id="keluarQty" type="number" min="1" value="1" oninput="updateKeluarError()"></div>' +
+    '<div class="field"><label>Tujuan Pengeluaran</label><input id="keluarTujuan" type="text" placeholder="mis. Workshop - perbaikan unit BX-12"></div>' +
+    '<div id="keluarError" class="error-text hidden"></div>' +
+    '<div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">Batal</button>' +
+    '<button class="btn btn-solid" id="keluarSubmit" onclick="submitKeluar()">Keluarkan Stock</button></div>';
+  openModal('Keluarkan Stock', body);
+  updateKeluarError();
+}
+function updateKeluarError() {
+  const kode = document.getElementById('keluarKode').value;
+  const qty = Number(document.getElementById('keluarQty').value);
+  const part = STATE.parts.find((p) => p.Kode === kode);
+  const errBox = document.getElementById('keluarError');
+  const submitBtn = document.getElementById('keluarSubmit');
+  if (qty > part.Stok) {
+    errBox.textContent = 'Stok ' + part.Nama + ' hanya tersedia ' + part.Stok + ' ' + part.Satuan + '.';
+    errBox.classList.remove('hidden'); submitBtn.disabled = true;
+  } else { errBox.classList.add('hidden'); submitBtn.disabled = qty <= 0; }
+}
+async function submitKeluar() {
+  const kode = document.getElementById('keluarKode').value;
+  const qty = Number(document.getElementById('keluarQty').value);
+  const tujuan = document.getElementById('keluarTujuan').value;
+  const btn = document.getElementById('keluarSubmit');
+  btn.disabled = true; btn.textContent = 'Memproses...';
+  try {
+    const part = STATE.parts.find((p) => p.Kode === kode);
+    if (qty > part.Stok) throw new Error('Stok tidak mencukupi.');
+    const newStok = part.Stok - qty;
+    let { error } = await sb.from('parts').update({ stok: newStok }).eq('kode', kode);
+    if (error) throw error;
+    ({ error } = await sb.from('ledger').insert({ part_kode: kode, tanggal: todayStr(), tipe: 'Keluar', qty, ref: tujuan || '-', saldo: newStok }));
+    if (error) throw error;
+    await loadData();
+    closeModal();
+    showToast(qty + ' unit ' + kode + ' dikeluarkan dari stok.');
+  } catch (err) {
+    showToast('Gagal: ' + (err.message || err), true);
+    btn.disabled = false; btn.textContent = 'Keluarkan Stock';
+  }
+}
+
+function openKartuModal(kode) {
+  const part = STATE.parts.find((p) => p.Kode === kode);
+  const entries = STATE.ledger.filter((l) => l.Kode === kode);
+  const rows = entries.map((e) => '<tr class="b-top"><td>' + fmtDate(e.Tanggal) + '</td><td>' + statusDot(e.Tipe) + '</td>' +
+    '<td class="mono">' + (e.Tipe === 'Keluar' ? '-' : '+') + e.Qty + ' ' + escapeHtml(part.Satuan || '') + '</td>' +
+    '<td class="muted">' + escapeHtml(String(e.Ref || '-')) + '</td><td class="mono fw-medium">' + e.Saldo + ' ' + escapeHtml(part.Satuan || '') + '</td></tr>').join('');
+  const body = '<div class="row-gap tiny muted mb3"><span class="mono">' + part.Kode + '</span><span>' + escapeHtml(part.Kategori || '-') + '</span><span>' + escapeHtml(part.Lokasi || '-') + '</span></div>' +
+    '<table class="table"><thead><tr>' + ['Tanggal', 'Tipe', 'Jumlah', 'Referensi', 'Saldo'].map((h) => '<th>' + h + '</th>').join('') + '</tr></thead><tbody>' + rows + '</tbody></table>';
+  openModal('Kartu Stock — ' + escapeHtml(part.Nama), body);
+}
+
+/* ================= KATALOG PART ================= */
+function renderKatalogPage() {
+  return '<div class="panel"><div class="p4 b-bottom row-between">' +
+    '<div class="search-box search-narrow">' + ICONS.search + '<input id="katalogSearch" type="text" placeholder="Cari part..." oninput="renderKatalogTable()"></div>' +
+    '<label class="tiny muted row-gap" style="cursor:pointer;"><input type="checkbox" id="katalogFilterReview" onchange="renderKatalogTable()" style="margin-right:6px;">Tampilkan Perlu Ditinjau saja</label></div>' +
+    '<div id="katalogTableWrap">' + renderKatalogTable(true) + '</div></div>';
+}
+function renderKatalogTable(returnOnly) {
+  const q = (document.getElementById('katalogSearch') && document.getElementById('katalogSearch').value || '').toLowerCase();
+  const onlyReview = document.getElementById('katalogFilterReview') && document.getElementById('katalogFilterReview').checked;
+  let filtered = STATE.parts.filter((p) => (p.Kode + ' ' + p.Nama + ' ' + (p.Kategori || '')).toLowerCase().includes(q));
+  if (onlyReview) filtered = filtered.filter((p) => p.StatusKatalog === 'Perlu Ditinjau');
+  const rows = filtered.map((p) => {
+    const sup = p.Kategori ? supplierByKategori(p.Kategori) : null;
+    return '<tr class="b-top"><td class="mono accent">' + p.Kode + '</td><td class="fw-medium">' + escapeHtml(p.Nama) + '</td>' +
+      '<td class="muted">' + escapeHtml(p.Kategori || '-') + '</td><td>' + escapeHtml(p.Satuan || '-') + '</td>' +
+      '<td>' + (sup ? escapeHtml(sup.Nama) : '-') + '</td><td class="mono">' + rp(p.Harga) + '</td>' +
+      '<td>' + statusDot(p.StatusKatalog || 'Terverifikasi') + '</td>' +
+      '<td><button class="btn btn-ghost btn-sm" onclick="openEditPartModal(\'' + p.Kode + '\')">Edit</button></td></tr>';
+  }).join('');
+  const table = '<table class="table"><thead><tr>' +
+    ['Kode', 'Nama Part', 'Kategori', 'Satuan', 'Supplier Utama', 'Harga Standar', 'Status Katalog', ''].map((h) => '<th>' + h + '</th>').join('') +
+    '</tr></thead><tbody>' + (rows || '<tr><td colspan="8" class="empty">Tidak ada part yang cocok.</td></tr>') + '</tbody></table>';
+  if (returnOnly) return table;
+  document.getElementById('katalogTableWrap').innerHTML = table;
+}
+function openEditPartModal(kode) {
+  const p = STATE.parts.find((x) => x.Kode === kode);
+  const body = '<div class="field"><label>Nama Part</label><input id="editNama" type="text" value="' + escapeHtml(p.Nama) + '"></div>' +
+    '<div class="field"><label>Kategori</label><input id="editKategori" type="text" value="' + escapeHtml(p.Kategori || '') + '"></div>' +
+    '<div class="field"><label>Lokasi</label><input id="editLokasi" type="text" value="' + escapeHtml(p.Lokasi || '') + '"></div>' +
+    '<div class="field"><label>Satuan</label><input id="editSatuan" type="text" value="' + escapeHtml(p.Satuan || '') + '"></div>' +
+    '<div class="field"><label>Min. Stok</label><input id="editMinStok" type="number" min="0" value="' + p.MinStok + '"></div>' +
+    '<div class="field"><label>Harga Standar</label><input id="editHarga" type="number" min="0" value="' + p.Harga + '"></div>' +
+    '<div class="field"><label>Status Katalog</label><select id="editStatusKatalog">' +
+    '<option value="Perlu Ditinjau"' + (p.StatusKatalog === 'Perlu Ditinjau' ? ' selected' : '') + '>Perlu Ditinjau</option>' +
+    '<option value="Terverifikasi"' + (p.StatusKatalog === 'Terverifikasi' ? ' selected' : '') + '>Terverifikasi</option></select></div>' +
+    '<div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">Batal</button>' +
+    '<button class="btn btn-solid" onclick="submitEditPart(\'' + kode + '\')">Simpan</button></div>';
+  openModal('Edit Part — ' + kode, body);
+}
+async function submitEditPart(kode) {
+  try {
+    const { error } = await sb.from('parts').update({
+      nama: document.getElementById('editNama').value.trim(),
+      kategori: document.getElementById('editKategori').value.trim(),
+      lokasi: document.getElementById('editLokasi').value.trim(),
+      satuan: document.getElementById('editSatuan').value.trim(),
+      min_stok: Number(document.getElementById('editMinStok').value),
+      harga: Number(document.getElementById('editHarga').value),
+      status_katalog: document.getElementById('editStatusKatalog').value,
+    }).eq('kode', kode);
+    if (error) throw error;
+    await loadData();
+    closeModal();
+    showToast('Part ' + kode + ' berhasil diperbarui.');
+  } catch (err) { showToast('Gagal: ' + (err.message || err), true); }
+}
+
+/* ================= SUPPLIER ================= */
+function renderSupplierPage() {
+  const rows = STATE.suppliers.map((s) => '<tr class="b-top"><td class="mono accent">' + s.ID + '</td>' +
+    '<td class="fw-medium">' + escapeHtml(s.Nama) + '</td><td>' + escapeHtml(s.Kontak || '-') + '</td>' +
+    '<td class="mono muted">' + escapeHtml(s.Telepon || '-') + '</td><td class="muted">' + escapeHtml(s.Kategori || '-') + '</td></tr>').join('');
+  return '<div class="panel"><table class="table"><thead><tr>' +
+    ['ID', 'Nama Supplier', 'Kontak Person', 'Telepon', 'Kategori Pasokan'].map((h) => '<th>' + h + '</th>').join('') +
+    '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+}
+
+/* ================= PURCHASE REQUEST ================= */
+function renderPRPage() {
+  const rows = STATE.pr.map((pr) => '<tr class="b-top"><td class="mono accent">' + pr.ID + '</td><td>' + fmtDate(pr.Tanggal) + '</td>' +
+    '<td class="fw-medium">' + escapeHtml(pr.DimintaOleh || '-') + '</td><td class="muted">' + escapeHtml(pr.Departemen || '-') + '</td>' +
+    '<td class="mono muted">' + escapeHtml(pr.EquipmentNumber || '-') + '</td><td class="mono">' + pr.Items.length + ' item</td>' +
+    '<td>' + statusDot(pr.Status) + '</td><td><button class="btn btn-ghost btn-sm" onclick="openPRDetail(\'' + pr.ID + '\')">Lihat Detail</button></td></tr>').join('');
+  return '<div class="panel"><table class="table"><thead><tr>' +
+    ['No. PR', 'Tanggal', 'Diminta Oleh', 'Departemen', 'Equipment', 'Jumlah Item', 'Status', ''].map((h) => '<th>' + h + '</th>').join('') +
+    '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+}
+function openPRDetail(id) {
+  const pr = STATE.pr.find((p) => p.ID === id);
+  const itemsHtml = pr.Items.map((it) => {
+    const part = STATE.parts.find((p) => p.Kode === it.kode);
+    return '<div class="row-between b-top py2"><div><div class="fw-medium">' + (part ? escapeHtml(part.Nama) : escapeHtml(it.namaItem || it.kode)) + '</div>' +
+      '<div class="tiny muted mono">' + it.kode + '</div></div><div class="mono">' + it.qty + ' ' + (part ? escapeHtml(part.Satuan || '') : escapeHtml(it.satuan || '')) + '</div></div>';
+  }).join('');
+  const actions = pr.Status === 'Menunggu'
+    ? '<div class="modal-actions"><button class="btn btn-danger" onclick="doUpdatePR(\'' + pr.ID + '\',\'Ditolak\')">Tolak</button>' +
+      '<button class="btn btn-solid" onclick="openApprovePRModal(\'' + pr.ID + '\')">Setujui &amp; Buat PO</button></div>' : '';
+  const body = '<div class="grid-2-info mb3">' +
+    '<div><div class="tiny muted">Diminta Oleh</div><div class="fw-medium">' + escapeHtml(pr.DimintaOleh || '-') + '</div></div>' +
+    '<div><div class="tiny muted">Departemen</div><div class="fw-medium">' + escapeHtml(pr.Departemen || '-') + '</div></div>' +
+    '<div><div class="tiny muted">Tanggal</div><div class="fw-medium">' + fmtDate(pr.Tanggal) + '</div></div>' +
+    '<div><div class="tiny muted">Status</div>' + statusDot(pr.Status) + '</div>' +
+    '<div><div class="tiny muted">Equipment Number</div><div class="fw-medium">' + escapeHtml(pr.EquipmentNumber || '-') + '</div></div></div>' +
+    '<div class="tiny muted section-label">Item Diminta</div>' + itemsHtml +
+    '<div class="tiny muted section-label" style="margin-top:14px;">Keterangan</div><div class="small">' + (pr.Keterangan ? escapeHtml(pr.Keterangan) : '-') + '</div>' + actions;
+  openModal(pr.ID, body);
+}
+async function doUpdatePR(id, status) {
+  try {
+    const { error } = await sb.from('purchase_requests').update({ status }).eq('id', id);
+    if (error) throw error;
+    await loadData();
+    closeModal();
+    showToast(id + ' ditandai ' + status.toLowerCase() + '.');
+  } catch (err) { showToast('Gagal: ' + (err.message || err), true); }
+}
+
+/* ---- Buat PR (multi item, tabel) ---- */
+let prItemIdx = 0;
+function prItemRowHtml(idx) {
+  const removeBtn = idx > 0 ? '<button type="button" class="icon-btn" onclick="removePrItemRow(' + idx + ')" title="Hapus baris">' + ICONS.x + '</button>' : '';
+  const s = 'width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:4px;padding:6px 8px;font-size:12.5px;font-family:inherit;';
+  return '<tr class="pr-item-row" data-idx="' + idx + '">' +
+    '<td style="padding:4px;"><input id="prKode_' + idx + '" list="partOptions" oninput="onPrKodeChange(' + idx + ')" placeholder="PN" style="' + s + '"></td>' +
+    '<td style="padding:4px;"><input id="prNamaItem_' + idx + '" placeholder="Nama item" style="' + s + '"></td>' +
+    '<td style="padding:4px;width:84px;"><input id="prSatuan_' + idx + '" placeholder="Satuan" style="' + s + '"></td>' +
+    '<td style="padding:4px;width:60px;"><input id="prQty_' + idx + '" type="number" min="1" value="1" style="' + s + '"></td>' +
+    '<td style="padding:4px;width:26px;text-align:center;">' + removeBtn + '</td></tr>';
+}
+function openBuatPRModal() {
+  const datalistOptions = STATE.parts.map((p) => '<option value="' + p.Kode + '">' + escapeHtml(p.Nama) + '</option>').join('');
+  const deptOptions = ['PLANT SM', 'PRODUKSI', 'HSE', 'HRGA'].map((d) => '<option>' + d + '</option>').join('');
+  prItemIdx = 0;
+  const body = '<div class="field"><label>Nama Pemohon</label><input id="prDiminta" type="text" placeholder="Nama pemohon"></div>' +
+    '<div class="field"><label>Departemen</label><select id="prDept">' + deptOptions + '</select></div>' +
+    '<div class="field"><label>Equipment Number</label><input id="prEquipment" type="text" placeholder="mis. EQ-1042"></div>' +
+    '<datalist id="partOptions">' + datalistOptions + '</datalist>' +
+    '<div class="tiny muted section-label">Item Diminta</div>' +
+    '<table style="width:100%;border-collapse:collapse;margin-bottom:6px;"><thead><tr class="tiny muted">' +
+    '<th style="text-align:left;padding:4px;">Part Number</th><th style="text-align:left;padding:4px;">Nama Item</th>' +
+    '<th style="text-align:left;padding:4px;width:84px;">Satuan</th><th style="text-align:left;padding:4px;width:60px;">Qty</th><th style="width:26px;"></th></tr></thead>' +
+    '<tbody id="prItemsBody">' + prItemRowHtml(0) + '</tbody></table>' +
+    '<button type="button" class="btn btn-ghost btn-sm" onclick="addPrItemRow()" style="margin-bottom:14px;">' + ICONS.plus + 'Tambah Item</button>' +
+    '<div class="field"><label>Keterangan</label><textarea id="prKeterangan" rows="2" placeholder="Alasan permintaan / kondisi part" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:8px 10px;font-size:13.5px;font-family:inherit;"></textarea></div>' +
+    '<div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">Batal</button>' +
+    '<button class="btn btn-solid" onclick="submitBuatPR()">Ajukan PR</button></div>';
+  openModal('Buat Purchase Request', body, 640);
+}
+function addPrItemRow() { prItemIdx += 1; document.getElementById('prItemsBody').insertAdjacentHTML('beforeend', prItemRowHtml(prItemIdx)); }
+function removePrItemRow(idx) { const row = document.querySelector('.pr-item-row[data-idx="' + idx + '"]'); if (row) row.remove(); }
+function onPrKodeChange(idx) {
+  const kode = document.getElementById('prKode_' + idx).value.trim().toUpperCase();
+  const part = STATE.parts.find((p) => p.Kode.toUpperCase() === kode);
+  const namaInput = document.getElementById('prNamaItem_' + idx);
+  const satuanInput = document.getElementById('prSatuan_' + idx);
+  if (part) {
+    namaInput.value = part.Nama; satuanInput.value = part.Satuan || '';
+    namaInput.readOnly = true; satuanInput.readOnly = true;
+    namaInput.style.opacity = '0.55'; satuanInput.style.opacity = '0.55';
+    namaInput.dataset.autofilled = '1'; satuanInput.dataset.autofilled = '1';
+  } else {
+    namaInput.readOnly = false; satuanInput.readOnly = false;
+    namaInput.style.opacity = '1'; satuanInput.style.opacity = '1';
+    if (namaInput.dataset.autofilled === '1') { namaInput.value = ''; satuanInput.value = ''; }
+    namaInput.dataset.autofilled = '0'; satuanInput.dataset.autofilled = '0';
+  }
+}
+async function ensurePartExistsClient(kode, namaItem, satuan) {
+  const existing = STATE.parts.find((p) => p.Kode.toUpperCase() === kode.toUpperCase());
+  if (existing) return;
+  const { error } = await sb.from('parts').insert({ kode, nama: namaItem || kode, satuan: satuan || '', stok: 0, min_stok: 0, harga: 0, status_katalog: 'Perlu Ditinjau' });
+  if (error) throw error;
+}
+async function submitBuatPR() {
+  const dimintaInput = document.getElementById('prDiminta');
+  const diminta = dimintaInput.value.trim();
+  const departemen = document.getElementById('prDept').value;
+  const equipmentNumber = document.getElementById('prEquipment').value.trim();
+  const keterangan = document.getElementById('prKeterangan').value.trim();
+  if (!diminta) {
+    dimintaInput.style.borderColor = 'var(--danger)'; dimintaInput.scrollIntoView({ block: 'center' }); dimintaInput.focus();
+    showToast('Isi dulu Nama Pemohon di bagian atas form.', true); return;
+  }
+  dimintaInput.style.borderColor = '';
+  const rows = document.querySelectorAll('.pr-item-row');
+  const items = [];
+  for (const row of rows) {
+    const idx = row.getAttribute('data-idx');
+    const kodeInput = document.getElementById('prKode_' + idx);
+    const kode = kodeInput.value.trim().toUpperCase();
+    const qty = Number(document.getElementById('prQty_' + idx).value);
+    if (!kode || qty <= 0) { kodeInput.style.borderColor = 'var(--danger)'; kodeInput.scrollIntoView({ block: 'center' }); showToast('Lengkapi Part Number dan Qty di semua item.', true); return; }
+    const existing = STATE.parts.find((p) => p.Kode.toUpperCase() === kode);
+    const namaInput = document.getElementById('prNamaItem_' + idx);
+    const satuanInput = document.getElementById('prSatuan_' + idx);
+    const namaItem = existing ? existing.Nama : namaInput.value.trim();
+    const satuan = existing ? existing.Satuan : satuanInput.value.trim();
+    if (!existing && (!namaItem || !satuan)) { namaInput.style.borderColor = 'var(--danger)'; satuanInput.style.borderColor = 'var(--danger)'; namaInput.scrollIntoView({ block: 'center' }); showToast('Part Number ' + kode + ' belum terdaftar — isi juga Nama Item dan Satuan.', true); return; }
+    items.push({ kode, qty, namaItem, satuan });
+  }
+  if (items.length === 0) { showToast('Tambahkan minimal satu item.', true); return; }
+  try {
+    for (const it of items) await ensurePartExistsClient(it.kode, it.namaItem, it.satuan);
+    const prId = genId('PR');
+    let { error } = await sb.from('purchase_requests').insert({ id: prId, tanggal: todayStr(), diminta_oleh: diminta, departemen, equipment_number: equipmentNumber, keterangan, status: 'Menunggu' });
+    if (error) throw error;
+    const itemRows = items.map((it) => ({ pr_id: prId, part_kode: it.kode, nama_item: it.namaItem, satuan: it.satuan, qty: it.qty }));
+    ({ error } = await sb.from('purchase_request_items').insert(itemRows));
+    if (error) throw error;
+    await loadData();
+    currentPage = 'pr'; renderNav(); renderPage();
+    openModal('✅ PR Berhasil Diajukan', '<div class="small" style="margin-bottom:18px;">PR sudah tersimpan di Supabase dan menunggu persetujuan.</div><div class="modal-actions"><button class="btn btn-solid" onclick="closeModal()">OK</button></div>', 420);
+  } catch (err) { showToast('Gagal: ' + (err.message || err), true); }
+}
+
+/* ---- Setujui PR & Buat PO ---- */
+function openApprovePRModal(id) {
+  const pr = STATE.pr.find((p) => p.ID === id);
+  const supplierOptions = STATE.suppliers.map((s) => '<option value="' + escapeHtml(s.Nama) + '">' + escapeHtml(s.Nama) + ' — ' + escapeHtml(s.Kategori || '') + '</option>').join('');
+  const itemsHtml = pr.Items.map((it) => {
+    const part = STATE.parts.find((p) => p.Kode === it.kode);
+    return '<div class="row-between b-top py2"><div><div class="fw-medium">' + (part ? escapeHtml(part.Nama) : escapeHtml(it.namaItem || it.kode)) + '</div>' +
+      '<div class="tiny muted mono">' + it.kode + ' · ' + it.qty + ' ' + (part ? escapeHtml(part.Satuan || '') : escapeHtml(it.satuan || '')) + '</div></div>' +
+      '<div style="width:150px;"><input type="number" min="0" class="po-harga-input" data-kode="' + it.kode + '" data-qty="' + it.qty + '" value="' + (part ? part.Harga : 0) + '" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:6px 8px;font-size:13px;font-family:inherit;"></div></div>';
+  }).join('');
+  const body = '<div class="field"><label>Supplier</label><select id="approveSupplier">' + supplierOptions + '</select></div>' +
+    '<div class="tiny muted section-label">Item &amp; Harga Satuan (bisa disesuaikan sebelum jadi PO)</div>' + itemsHtml +
+    '<div class="modal-actions" style="margin-top:16px;"><button class="btn btn-ghost" onclick="closeModal()">Batal</button>' +
+    '<button class="btn btn-solid" onclick="submitApprovePR(\'' + id + '\')">Setujui &amp; Buat PO</button></div>';
+  openModal('Setujui ' + pr.ID, body, 540);
+}
+async function submitApprovePR(id) {
+  const supplier = document.getElementById('approveSupplier').value;
+  const inputs = document.querySelectorAll('.po-harga-input');
+  const items = Array.from(inputs).map((inp) => ({ kode: inp.getAttribute('data-kode'), qty: Number(inp.getAttribute('data-qty')), harga: Number(inp.value) }));
+  try {
+    let { error } = await sb.from('purchase_requests').update({ status: 'Disetujui' }).eq('id', id);
+    if (error) throw error;
+    const poId = genId('PO');
+    ({ error } = await sb.from('purchase_orders').insert({ id: poId, supplier, tanggal: todayStr(), status: 'Draft' }));
+    if (error) throw error;
+    const rows = items.map((it) => ({ po_id: poId, part_kode: it.kode, qty: it.qty, harga: it.harga }));
+    ({ error } = await sb.from('purchase_order_items').insert(rows));
+    if (error) throw error;
+    await loadData();
+    closeModal();
+    currentPage = 'po'; renderNav(); renderPage();
+    showToast(id + ' disetujui — PO ' + poId + ' dibuat. Menyiapkan PDF...');
+    generateAndDownloadPOPdf(poId);
+  } catch (err) { showToast('Gagal: ' + (err.message || err), true); }
+}
+
+/* ================= PURCHASE ORDER ================= */
+function renderPOPage() {
+  const rows = STATE.po.map((po) => {
+    const total = po.Items.reduce((s, it) => s + it.qty * it.harga, 0);
+    return '<tr class="b-top"><td class="mono accent">' + po.ID + '</td><td class="fw-medium">' + escapeHtml(po.Supplier || '-') + '</td>' +
+      '<td>' + fmtDate(po.Tanggal) + '</td><td class="mono">' + rp(total) + '</td><td>' + statusDot(po.Status) + '</td>' +
+      '<td class="row-gap"><button class="btn btn-ghost btn-sm" onclick="openPODetail(\'' + po.ID + '\')">Lihat Detail</button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="generateAndDownloadPOPdf(\'' + po.ID + '\')">' + ICONS.pdf + 'Cetak PDF</button>' +
+      (po.Status === 'Draft' ? '<button class="btn btn-solid btn-sm" onclick="doKirimPO(\'' + po.ID + '\')">' + ICONS.send + 'Kirim</button>' : '') + '</td></tr>';
+  }).join('');
+  return '<div class="panel"><table class="table"><thead><tr>' +
+    ['No. PO', 'Supplier', 'Tanggal', 'Total', 'Status', ''].map((h) => '<th>' + h + '</th>').join('') + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+}
+function openPODetail(id) {
+  const po = STATE.po.find((p) => p.ID === id);
+  const total = po.Items.reduce((s, it) => s + it.qty * it.harga, 0);
+  const itemsHtml = po.Items.map((it) => {
+    const part = STATE.parts.find((p) => p.Kode === it.kode);
+    return '<div class="row-between b-top py2"><div><div class="fw-medium">' + (part ? escapeHtml(part.Nama) : it.kode) + '</div>' +
+      '<div class="tiny muted mono">' + it.kode + ' · ' + it.qty + ' ' + (part ? escapeHtml(part.Satuan || '') : '') + ' x ' + rp(it.harga) + '</div></div>' +
+      '<div class="mono">' + rp(it.qty * it.harga) + '</div></div>';
+  }).join('');
+  const body = '<div class="grid-2-info mb3"><div><div class="tiny muted">Supplier</div><div class="fw-medium">' + escapeHtml(po.Supplier || '-') + '</div></div>' +
+    '<div><div class="tiny muted">Tanggal</div><div class="fw-medium">' + fmtDate(po.Tanggal) + '</div></div>' +
+    '<div><div class="tiny muted">Status</div>' + statusDot(po.Status) + '</div></div>' +
+    '<div class="tiny muted section-label">Item Dipesan</div>' + itemsHtml +
+    '<div class="row-between total-row"><span>Total</span><span class="mono">' + rp(total) + '</span></div>';
+  openModal(po.ID, body);
+}
+async function doKirimPO(id) {
+  try {
+    const { error } = await sb.from('purchase_orders').update({ status: 'Dikirim' }).eq('id', id);
+    if (error) throw error;
+    await loadData();
+    showToast(id + ' telah dikirim ke supplier.');
+  } catch (err) { showToast('Gagal: ' + (err.message || err), true); }
+}
+
+/* ---- Generate PDF PO (client-side, jsPDF) ---- */
+function generateAndDownloadPOPdf(poId) {
+  const po = STATE.po.find((p) => p.ID === poId);
+  if (!po) { showToast('PO tidak ditemukan untuk PDF.', true); return; }
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFontSize(16); doc.text('PURCHASE ORDER', 14, 18);
+    doc.setFontSize(10); doc.text('PT CPE — Inventory & Purchasing', 14, 25);
+    doc.text('No. PO: ' + po.ID, 14, 35);
+    doc.text('Tanggal: ' + po.Tanggal, 14, 41);
+    doc.text('Status: ' + po.Status, 14, 47);
+    doc.text('Kepada Supplier:', 120, 35);
+    doc.text(String(po.Supplier || '-'), 120, 41);
+
+    const rows = po.Items.map((it, i) => {
+      const part = STATE.parts.find((p) => p.Kode === it.kode) || {};
+      return [i + 1, it.kode, part.Nama || '-', it.qty + ' ' + (part.Satuan || ''), rp(it.harga), rp(it.qty * it.harga)];
+    });
+    const total = po.Items.reduce((s, it) => s + it.qty * it.harga, 0);
+
+    doc.autoTable({
+      startY: 55,
+      head: [['No', 'Part Number', 'Nama Item', 'Qty', 'Harga Satuan', 'Subtotal']],
+      body: rows,
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [45, 212, 196] },
+    });
+
+    const finalY = doc.lastAutoTable.finalY + 8;
+    doc.setFontSize(11);
+    doc.text('TOTAL: ' + rp(total), 140, finalY);
+
+    const signY = finalY + 40;
+    doc.setFontSize(10);
+    doc.text('Dibuat oleh', 20, signY);
+    doc.text('Diperiksa oleh', 90, signY);
+    doc.text('Disetujui oleh', 160, signY);
+    doc.text('(____________________)', 14, signY + 20);
+    doc.text('(____________________)', 84, signY + 20);
+    doc.text('(____________________)', 154, signY + 20);
+
+    doc.save(po.ID + '.pdf');
+    showToast('PDF ' + po.ID + ' berhasil diunduh.');
+  } catch (err) {
+    showToast('Gagal membuat PDF: ' + (err.message || err), true);
+  }
+}
+
+/* ================= PENERIMAAN GUDANG ================= */
+function renderPenerimaanPage() {
+  const rows = STATE.penerimaan.map((p) => {
+    const itemsHtml = p.Items.map((it) => {
+      const part = STATE.parts.find((x) => x.Kode === it.kode);
+      return '<div class="tiny">' + (part ? escapeHtml(part.Nama) : it.kode) + ' · ' + it.qty + ' ' + (part ? escapeHtml(part.Satuan || '') : '') + '</div>';
+    }).join('');
+    return '<tr class="b-top"><td class="mono accent">' + p.ID + '</td><td class="mono muted">' + (p.PO || '-') + '</td>' +
+      '<td class="fw-medium">' + escapeHtml(p.Supplier || '-') + '</td><td>' + fmtDate(p.Tanggal) + '</td><td>' + itemsHtml + '</td>' +
+      '<td>' + statusDot(p.Status) + '</td><td>' + (p.Status === 'Menunggu'
+        ? '<button class="btn btn-solid btn-sm" onclick="doTerimaPenerimaan(\'' + p.ID + '\')">' + ICONS.check + 'Konfirmasi Terima</button>'
+        : '<span class="tiny muted">Selesai</span>') + '</td></tr>';
+  }).join('');
+  return '<div class="panel"><table class="table"><thead><tr>' +
+    ['No. Penerimaan', 'No. PO', 'Supplier', 'Tanggal', 'Item', 'Status', ''].map((h) => '<th>' + h + '</th>').join('') + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+}
+async function doTerimaPenerimaan(id) {
+  try {
+    const pgr = STATE.penerimaan.find((p) => p.ID === id);
+    if (!pgr) throw new Error('Penerimaan tidak ditemukan.');
+    let { error } = await sb.from('penerimaan').update({ status: 'Diterima' }).eq('id', id);
+    if (error) throw error;
+    if (pgr.PO) { ({ error } = await sb.from('purchase_orders').update({ status: 'Diterima' }).eq('id', pgr.PO)); if (error) throw error; }
+    for (const it of pgr.Items) {
+      const part = STATE.parts.find((p) => p.Kode === it.kode);
+      const newStok = (part ? part.Stok : 0) + it.qty;
+      ({ error } = await sb.from('parts').update({ stok: newStok }).eq('kode', it.kode));
+      if (error) throw error;
+      ({ error } = await sb.from('ledger').insert({ part_kode: it.kode, tanggal: todayStr(), tipe: 'Masuk', qty: it.qty, ref: pgr.PO || '-', saldo: newStok }));
+      if (error) throw error;
+    }
+    await loadData();
+    showToast('Penerimaan ' + id + ' dikonfirmasi. Stok telah diperbarui.');
+  } catch (err) { showToast('Gagal: ' + (err.message || err), true); }
+}
+</script>
+</body>
+</html>
