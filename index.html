@@ -159,6 +159,25 @@ const SUPABASE_URL = 'https://yeoaghlebsepmzidwwpa.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inllb2FnaGxlYnNlcG16aWR3d3BhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1MjUwMDUsImV4cCI6MjEwNTEwMTAwNX0.uMrb5UzWMlGBB_HdGpEr_aTE73g8uhW4AiQ-oyLOwvk';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+/* ================= LOGO & PENOMORAN PO ================= */
+const LOGO_BASE64 = 'data:image/png;base64,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';
+
+const DEPT_CODE = { 'PLANT SM': 'SM', 'PRODUKSI': 'PRD', 'HSE': 'HSE', 'HRGA': 'HRGA' };
+
+async function nextPoNumber(deptCode) {
+  const { data, error } = await sb.from('purchase_orders').select('id').ilike('id', deptCode + '%').order('id', { ascending: false }).limit(50);
+  if (error) throw error;
+  let nextNum = 1;
+  if (data && data.length) {
+    const nums = data
+      .map((r) => r.id.slice(deptCode.length))
+      .map((s) => parseInt(s, 10))
+      .filter((n) => !isNaN(n));
+    if (nums.length) nextNum = Math.max(...nums) + 1;
+  }
+  return deptCode + String(nextNum).padStart(5, '0');
+}
+
 /* ================= ICONS ================= */
 const ICONS = {
   grid: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>',
@@ -212,7 +231,7 @@ function mapPart(p) {
   return { Kode: p.kode, Nama: p.nama, Kategori: p.kategori, Lokasi: p.lokasi, Satuan: p.satuan,
     Stok: Number(p.stok), MinStok: Number(p.min_stok), Harga: Number(p.harga), StatusKatalog: p.status_katalog };
 }
-function mapSupplier(s) { return { ID: s.id, Nama: s.nama, Kontak: s.kontak, Telepon: s.telepon, Kategori: s.kategori }; }
+function mapSupplier(s) { return { ID: s.id, Nama: s.nama, Kontak: s.kontak, Telepon: s.telepon, Kategori: s.kategori, Alamat: s.alamat }; }
 function mapPR(r) {
   return { ID: r.id, Tanggal: r.tanggal, DimintaOleh: r.diminta_oleh, Departemen: r.departemen,
     EquipmentNumber: r.equipment_number, Keterangan: r.keterangan, Status: r.status,
@@ -220,6 +239,9 @@ function mapPR(r) {
 }
 function mapPO(r) {
   return { ID: r.id, Supplier: r.supplier, Tanggal: r.tanggal, Status: r.status,
+    DueDate: r.due_date, DistrictWh: r.district_wh, DeliveryPlace: r.delivery_place,
+    QuotationNo: r.quotation_no, Discount: Number(r.discount || 0), PpnPercent: Number(r.ppn_percent || 11),
+    Notes: r.notes, AuthorizedPerson: r.authorized_person, ReqDept: r.req_dept,
     Items: (r.purchase_order_items || []).map((it) => ({ kode: it.part_kode, qty: Number(it.qty), harga: Number(it.harga) })) };
 }
 function mapPGR(r) {
@@ -523,9 +545,10 @@ async function submitEditPart(kode) {
 function renderSupplierPage() {
   const rows = STATE.suppliers.map((s) => '<tr class="b-top"><td class="mono accent">' + s.ID + '</td>' +
     '<td class="fw-medium">' + escapeHtml(s.Nama) + '</td><td>' + escapeHtml(s.Kontak || '-') + '</td>' +
-    '<td class="mono muted">' + escapeHtml(s.Telepon || '-') + '</td><td class="muted">' + escapeHtml(s.Kategori || '-') + '</td></tr>').join('');
+    '<td class="mono muted">' + escapeHtml(s.Telepon || '-') + '</td><td class="muted">' + escapeHtml(s.Kategori || '-') + '</td>' +
+    '<td class="muted">' + escapeHtml(s.Alamat || '-') + '</td></tr>').join('');
   return '<div class="panel"><table class="table"><thead><tr>' +
-    ['ID', 'Nama Supplier', 'Kontak Person', 'Telepon', 'Kategori Pasokan'].map((h) => '<th>' + h + '</th>').join('') +
+    ['ID', 'Nama Supplier', 'Kontak Person', 'Telepon', 'Kategori Pasokan', 'Alamat'].map((h) => '<th>' + h + '</th>').join('') +
     '</tr></thead><tbody>' + rows + '</tbody></table></div>';
 }
 
@@ -677,21 +700,52 @@ function openApprovePRModal(id) {
       '<div class="tiny muted mono">' + it.kode + ' · ' + it.qty + ' ' + (part ? escapeHtml(part.Satuan || '') : escapeHtml(it.satuan || '')) + '</div></div>' +
       '<div style="width:150px;"><input type="number" min="0" class="po-harga-input" data-kode="' + it.kode + '" data-qty="' + it.qty + '" value="' + (part ? part.Harga : 0) + '" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:6px 8px;font-size:13px;font-family:inherit;"></div></div>';
   }).join('');
+  const dueDateDefault = (() => { const d = new Date(); d.setDate(d.getDate() + 7); return d.toISOString().slice(0, 10); })();
   const body = '<div class="field"><label>Supplier</label><select id="approveSupplier">' + supplierOptions + '</select></div>' +
     '<div class="tiny muted section-label">Item &amp; Harga Satuan (bisa disesuaikan sebelum jadi PO)</div>' + itemsHtml +
+    '<div class="grid-2-info" style="margin-top:14px;">' +
+    '<div class="field"><label>Due Date</label><input id="poDueDate" type="date" value="' + dueDateDefault + '"></div>' +
+    '<div class="field"><label>District / WH</label><input id="poDistrictWh" type="text" placeholder="mis. EPNS"></div>' +
+    '</div>' +
+    '<div class="field"><label>Delivery Place</label><textarea id="poDeliveryPlace" rows="2" placeholder="Alamat pengiriman / site tujuan" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:8px 10px;font-size:13.5px;font-family:inherit;"></textarea></div>' +
+    '<div class="grid-2-info">' +
+    '<div class="field"><label>No. Quotation</label><input id="poQuotationNo" type="text" placeholder="mis. QUO2609005/KTU/FB"></div>' +
+    '<div class="field"><label>Discount (Rp)</label><input id="poDiscount" type="number" min="0" value="0"></div>' +
+    '</div>' +
+    '<div class="grid-2-info">' +
+    '<div class="field"><label>PPN (%)</label><input id="poPpnPercent" type="number" min="0" value="11"></div>' +
+    '<div class="field"><label>Authorized Person</label><input id="poAuthorizedPerson" type="text" placeholder="Nama penanggung jawab"></div>' +
+    '</div>' +
+    '<div class="field"><label>Notes</label><input id="poNotes" type="text" placeholder="mis. WATERFILL"></div>' +
     '<div class="modal-actions" style="margin-top:16px;"><button class="btn btn-ghost" onclick="closeModal()">Batal</button>' +
     '<button class="btn btn-solid" onclick="submitApprovePR(\'' + id + '\')">Setujui &amp; Buat PO</button></div>';
-  openModal('Setujui ' + pr.ID, body, 540);
+  openModal('Setujui ' + pr.ID, body, 560);
 }
 async function submitApprovePR(id) {
+  const pr = STATE.pr.find((p) => p.ID === id);
   const supplier = document.getElementById('approveSupplier').value;
   const inputs = document.querySelectorAll('.po-harga-input');
   const items = Array.from(inputs).map((inp) => ({ kode: inp.getAttribute('data-kode'), qty: Number(inp.getAttribute('data-qty')), harga: Number(inp.value) }));
+  const dueDate = document.getElementById('poDueDate').value || null;
+  const districtWh = document.getElementById('poDistrictWh').value.trim();
+  const deliveryPlace = document.getElementById('poDeliveryPlace').value.trim();
+  const quotationNo = document.getElementById('poQuotationNo').value.trim();
+  const discount = Number(document.getElementById('poDiscount').value) || 0;
+  const ppnPercent = Number(document.getElementById('poPpnPercent').value);
+  const notes = document.getElementById('poNotes').value.trim();
+  const authorizedPerson = document.getElementById('poAuthorizedPerson').value.trim();
+  const reqDept = pr.Departemen || '';
   try {
     let { error } = await sb.from('purchase_requests').update({ status: 'Disetujui' }).eq('id', id);
     if (error) throw error;
-    const poId = genId('PO');
-    ({ error } = await sb.from('purchase_orders').insert({ id: poId, supplier, tanggal: todayStr(), status: 'Draft' }));
+    const deptCode = DEPT_CODE[reqDept] || 'PO';
+    const poId = await nextPoNumber(deptCode);
+    ({ error } = await sb.from('purchase_orders').insert({
+      id: poId, supplier, tanggal: todayStr(), status: 'Draft',
+      due_date: dueDate, district_wh: districtWh, delivery_place: deliveryPlace,
+      quotation_no: quotationNo, discount, ppn_percent: isNaN(ppnPercent) ? 11 : ppnPercent,
+      notes, authorized_person: authorizedPerson, req_dept: reqDept,
+    }));
     if (error) throw error;
     const rows = items.map((it) => ({ po_id: poId, part_kode: it.kode, qty: it.qty, harga: it.harga }));
     ({ error } = await sb.from('purchase_order_items').insert(rows));
@@ -728,9 +782,13 @@ function openPODetail(id) {
   }).join('');
   const body = '<div class="grid-2-info mb3"><div><div class="tiny muted">Supplier</div><div class="fw-medium">' + escapeHtml(po.Supplier || '-') + '</div></div>' +
     '<div><div class="tiny muted">Tanggal</div><div class="fw-medium">' + fmtDate(po.Tanggal) + '</div></div>' +
-    '<div><div class="tiny muted">Status</div>' + statusDot(po.Status) + '</div></div>' +
+    '<div><div class="tiny muted">Due Date</div><div class="fw-medium">' + (po.DueDate ? fmtDate(po.DueDate) : '-') + '</div></div>' +
+    '<div><div class="tiny muted">District/WH</div><div class="fw-medium">' + escapeHtml(po.DistrictWh || '-') + '</div></div>' +
+    '<div><div class="tiny muted">Status</div>' + statusDot(po.Status) + '</div>' +
+    '<div><div class="tiny muted">No. Quotation</div><div class="fw-medium">' + escapeHtml(po.QuotationNo || '-') + '</div></div></div>' +
     '<div class="tiny muted section-label">Item Dipesan</div>' + itemsHtml +
-    '<div class="row-between total-row"><span>Total</span><span class="mono">' + rp(total) + '</span></div>';
+    '<div class="row-between total-row"><span>Total</span><span class="mono">' + rp(total) + '</span></div>' +
+    (po.Notes ? '<div class="tiny muted section-label" style="margin-top:14px;">Notes</div><div class="small">' + escapeHtml(po.Notes) + '</div>' : '');
   openModal(po.ID, body);
 }
 async function doKirimPO(id) {
@@ -742,53 +800,149 @@ async function doKirimPO(id) {
   } catch (err) { showToast('Gagal: ' + (err.message || err), true); }
 }
 
-/* ---- Generate PDF PO (client-side, jsPDF) ---- */
+/* ---- Generate PDF PO (client-side, jsPDF) — format resmi perusahaan ---- */
+const COMPANY_ADDRESS = 'PT Citra Shipyard 12N, Treasury Tower, Kawasan District 8 LOT 28, Jl. Tulodong Atas 2 No.28,\nRT.5/RW.3, Senayan, Kec. Kby. Baru, Kota Jakarta Selatan, Daerah Khusus Ibukota Jakarta (12190)';
+
 function generateAndDownloadPOPdf(poId) {
   const po = STATE.po.find((p) => p.ID === poId);
   if (!po) { showToast('PO tidak ditemukan untuk PDF.', true); return; }
   try {
+    const supplier = STATE.suppliers.find((s) => s.Nama === po.Supplier) || {};
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    doc.setFontSize(16); doc.text('PURCHASE ORDER', 14, 18);
-    doc.setFontSize(10); doc.text('PT CPE — Inventory & Purchasing', 14, 25);
-    doc.text('No. PO: ' + po.ID, 14, 35);
-    doc.text('Tanggal: ' + po.Tanggal, 14, 41);
-    doc.text('Status: ' + po.Status, 14, 47);
-    doc.text('Kepada Supplier:', 120, 35);
-    doc.text(String(po.Supplier || '-'), 120, 41);
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const marginX = 14;
 
+    // Header: logo + alamat perusahaan
+    try { doc.addImage(LOGO_BASE64, 'PNG', marginX, 10, 55, 8); } catch (e) { /* lanjut tanpa logo kalau gagal */ }
+    doc.setFontSize(8);
+    doc.setTextColor(60);
+    doc.text(doc.splitTextToSize(COMPANY_ADDRESS, pageWidth - marginX * 2), marginX, 24);
+    doc.setTextColor(0);
+    doc.setDrawColor(0);
+    doc.line(marginX, 32, pageWidth - marginX, 32);
+
+    // Judul
+    doc.setFontSize(15);
+    doc.setFont(undefined, 'bold');
+    doc.text('PURCHASE ORDER', pageWidth / 2, 40, { align: 'center' });
+    doc.setFont(undefined, 'normal');
+    doc.line(marginX, 44, pageWidth - marginX, 44);
+
+    // Baris info: PO NO / DATE / DUE DATE / DISTRICT-WH
+    doc.setFontSize(9);
+    const infoY = 50;
+    doc.setFont(undefined, 'bold'); doc.text('PO NO', marginX, infoY); doc.setFont(undefined, 'normal');
+    doc.text(po.ID, marginX + 16, infoY);
+    doc.setFont(undefined, 'bold'); doc.text('DATE', marginX + 55, infoY); doc.setFont(undefined, 'normal');
+    doc.text(fmtDateShort(po.Tanggal), marginX + 70, infoY);
+    doc.setFont(undefined, 'bold'); doc.text('DUE DATE', marginX + 100, infoY); doc.setFont(undefined, 'normal');
+    doc.text(fmtDateShort(po.DueDate), marginX + 122, infoY);
+    doc.setFont(undefined, 'bold'); doc.text('DISTRICT/WH', marginX + 152, infoY); doc.setFont(undefined, 'normal');
+    doc.text(po.DistrictWh || '-', marginX + 178, infoY);
+    doc.line(marginX, infoY + 4, pageWidth - marginX, infoY + 4);
+
+    // Supplier (kiri) & Delivery Place (kanan)
+    const blockY = infoY + 12;
+    doc.setFont(undefined, 'bold');
+    doc.text(String(po.Supplier || '-').toUpperCase(), marginX, blockY);
+    doc.setFont(undefined, 'normal');
+    const supAddrLines = doc.splitTextToSize(supplier.Alamat || '-', 90);
+    doc.text(supAddrLines, marginX, blockY + 5);
+    let afterAddrY = blockY + 5 + supAddrLines.length * 4;
+    doc.text('ATTN : ' + (supplier.Telepon || '-'), marginX, afterAddrY + 2);
+
+    doc.setFont(undefined, 'bold');
+    doc.text('DELIVERY PLACE :', 115, blockY);
+    doc.setFont(undefined, 'normal');
+    const deliveryLines = doc.splitTextToSize(po.DeliveryPlace || '-', 85);
+    doc.text(deliveryLines, 115, blockY + 5);
+
+    const tableStartY = Math.max(afterAddrY + 10, blockY + 5 + deliveryLines.length * 4 + 6);
+
+    // Tabel item
     const rows = po.Items.map((it, i) => {
       const part = STATE.parts.find((p) => p.Kode === it.kode) || {};
-      return [i + 1, it.kode, part.Nama || '-', it.qty + ' ' + (part.Satuan || ''), rp(it.harga), rp(it.qty * it.harga)];
+      return [i + 1, part.Nama || it.kode, it.kode, it.qty + ' ' + (part.Satuan || ''), rp(it.harga), rp(it.qty * it.harga)];
     });
-    const total = po.Items.reduce((s, it) => s + it.qty * it.harga, 0);
-
     doc.autoTable({
-      startY: 55,
-      head: [['No', 'Part Number', 'Nama Item', 'Qty', 'Harga Satuan', 'Subtotal']],
+      startY: tableStartY,
+      head: [['NO', 'ITEM NAME/DESCRIPTION', 'PART NUMBER', 'UOP', 'UNIT PRICE', 'TOTAL PRICE']],
       body: rows,
-      styles: { fontSize: 9 },
-      headStyles: { fillColor: [45, 212, 196] },
+      styles: { fontSize: 8.5, lineColor: [0, 0, 0], lineWidth: 0.2 },
+      headStyles: { fillColor: [91, 141, 239], textColor: 255, fontStyle: 'bold' },
+      columnStyles: { 0: { cellWidth: 10 }, 4: { halign: 'right' }, 5: { halign: 'right' } },
+      theme: 'grid',
     });
 
-    const finalY = doc.lastAutoTable.finalY + 8;
-    doc.setFontSize(11);
-    doc.text('TOTAL: ' + rp(total), 140, finalY);
+    const subTotal = po.Items.reduce((s, it) => s + it.qty * it.harga, 0);
+    const discount = po.Discount || 0;
+    const net = subTotal - discount;
+    const ppn = net * ((po.PpnPercent || 11) / 100);
+    const total = net + ppn;
 
-    const signY = finalY + 40;
-    doc.setFontSize(10);
-    doc.text('Dibuat oleh', 20, signY);
-    doc.text('Diperiksa oleh', 90, signY);
-    doc.text('Disetujui oleh', 160, signY);
-    doc.text('(____________________)', 14, signY + 20);
-    doc.text('(____________________)', 84, signY + 20);
-    doc.text('(____________________)', 154, signY + 20);
+    const afterTableY = doc.lastAutoTable.finalY + 6;
+
+    // Kiri: kode internal, quotation, req dept, note box
+    doc.setFontSize(8.5);
+    doc.text('PO_CPE_' + (po.DistrictWh || '-').toUpperCase(), marginX, afterTableY);
+    doc.text('QUO ' + (po.QuotationNo || '-'), marginX, afterTableY + 4.5);
+    doc.text('REQ DEPT ' + (po.ReqDept || '-'), marginX, afterTableY + 9);
+
+    doc.setDrawColor(150);
+    doc.rect(marginX, afterTableY + 13, 75, 18);
+    doc.setFont(undefined, 'bold');
+    doc.text('Note:', marginX + 2, afterTableY + 18);
+    doc.setFont(undefined, 'normal');
+    doc.text(doc.splitTextToSize(po.Notes || '-', 70), marginX + 2, afterTableY + 23);
+
+    // Kanan: breakdown total
+    const totalsX = 120;
+    const totalsLabelX = totalsX;
+    const totalsValueX = pageWidth - marginX;
+    let ty = afterTableY;
+    const totalLine = (label, value, bold) => {
+      doc.setFont(undefined, bold ? 'bold' : 'normal');
+      doc.text(label, totalsLabelX, ty);
+      doc.text(value, totalsValueX, ty, { align: 'right' });
+      ty += 5.5;
+    };
+    totalLine('SUB TOTAL', rp(subTotal));
+    totalLine('DISCOUNT', (discount ? '-' : '') + rp(discount));
+    totalLine('NET', rp(net));
+    totalLine('PPN ' + (po.PpnPercent || 11) + '%', rp(ppn));
+    doc.setDrawColor(0);
+    doc.line(totalsLabelX, ty - 3, totalsValueX, ty - 3);
+    totalLine('TOTAL', rp(total), true);
+    doc.setFont(undefined, 'normal');
+
+    // Tanda tangan
+    const signY = Math.max(afterTableY + 45, ty + 25);
+    doc.setFontSize(9);
+    doc.text('Supplier', marginX, signY);
+    doc.text('Authorized person,', 115, signY);
+    doc.text('SIGNED :', marginX, signY + 12);
+    doc.line(marginX + 18, signY + 12, marginX + 75, signY + 12);
+    doc.text('NAME :', marginX, signY + 19);
+    doc.line(marginX + 18, signY + 19, marginX + 75, signY + 19);
+    doc.text('DATE :', marginX, signY + 26);
+    doc.line(marginX + 18, signY + 26, marginX + 75, signY + 26);
+    doc.text(po.AuthorizedPerson || '-', 115, signY + 19);
 
     doc.save(po.ID + '.pdf');
     showToast('PDF ' + po.ID + ' berhasil diunduh.');
   } catch (err) {
     showToast('Gagal membuat PDF: ' + (err.message || err), true);
   }
+}
+function fmtDateShort(d) {
+  if (!d) return '-';
+  const dt = new Date(d);
+  if (isNaN(dt.getTime())) return d;
+  const dd = String(dt.getDate()).padStart(2, '0');
+  const mm = String(dt.getMonth() + 1).padStart(2, '0');
+  const yy = String(dt.getFullYear()).slice(-2);
+  return dd + '/' + mm + '/' + yy;
 }
 
 /* ================= PENERIMAAN GUDANG ================= */
