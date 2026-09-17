@@ -164,6 +164,24 @@ const LOGO_BASE64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAU8AAAAwCAYAA
 
 const DEPT_CODE = { 'PLANT SM': 'SM', 'PRODUKSI': 'PRD', 'HSE': 'HSE', 'HRGA': 'HRGA' };
 
+/* ---- Nama tetap penanda tangan form PR (sama untuk semua PR) ---- */
+const JOB_SITE = 'Job Site EPN Sukan Tengah, Sambaliung Berau';
+const PR_KNOWN_BY = { name: 'Parto Jaya H Silitonga', title: 'Project Manager' };
+const PR_APPROVED_BY = { name: 'Faisal H Simangunsong', title: 'Operational Directur' };
+
+async function nextPrNumber() {
+  const { data, error } = await sb.from('purchase_requests').select('id');
+  if (error) throw error;
+  let max = 0;
+  (data || []).forEach((r) => {
+    if (/^\d+$/.test(r.id)) {
+      const n = parseInt(r.id, 10);
+      if (n > max) max = n;
+    }
+  });
+  return String(max + 1).padStart(5, '0');
+}
+
 async function nextPoNumber(deptCode) {
   const { data, error } = await sb.from('purchase_orders').select('id').ilike('id', deptCode + '%').order('id', { ascending: false }).limit(50);
   if (error) throw error;
@@ -233,15 +251,15 @@ function mapPart(p) {
 }
 function mapSupplier(s) { return { ID: s.id, Nama: s.nama, Kontak: s.kontak, Telepon: s.telepon, Kategori: s.kategori, Alamat: s.alamat }; }
 function mapPR(r) {
-  return { ID: r.id, Tanggal: r.tanggal, DimintaOleh: r.diminta_oleh, Departemen: r.departemen,
-    EquipmentNumber: r.equipment_number, Keterangan: r.keterangan, Status: r.status,
+  return { ID: r.id, Tanggal: r.tanggal, DimintaOleh: r.diminta_oleh, Jabatan: r.jabatan, Departemen: r.departemen,
+    EquipmentNumber: r.equipment_number, Keterangan: r.keterangan, Status: r.status, SignedFileUrl: r.signed_file_url,
     Items: (r.purchase_request_items || []).map((it) => ({ kode: it.part_kode, namaItem: it.nama_item, satuan: it.satuan, qty: Number(it.qty) })) };
 }
 function mapPO(r) {
   return { ID: r.id, Supplier: r.supplier, Tanggal: r.tanggal, Status: r.status,
     DueDate: r.due_date, DistrictWh: r.district_wh, DeliveryPlace: r.delivery_place,
     QuotationNo: r.quotation_no, Discount: Number(r.discount || 0), PpnPercent: Number(r.ppn_percent || 11),
-    Notes: r.notes, AuthorizedPerson: r.authorized_person, ReqDept: r.req_dept,
+    Notes: r.notes, AuthorizedPerson: r.authorized_person, ReqDept: r.req_dept, SignedFileUrl: r.signed_file_url,
     Items: (r.purchase_order_items || []).map((it) => ({ kode: it.part_kode, qty: Number(it.qty), harga: Number(it.harga) })) };
 }
 function mapPGR(r) {
@@ -557,7 +575,8 @@ function renderPRPage() {
   const rows = STATE.pr.map((pr) => '<tr class="b-top"><td class="mono accent">' + pr.ID + '</td><td>' + fmtDate(pr.Tanggal) + '</td>' +
     '<td class="fw-medium">' + escapeHtml(pr.DimintaOleh || '-') + '</td><td class="muted">' + escapeHtml(pr.Departemen || '-') + '</td>' +
     '<td class="mono muted">' + escapeHtml(pr.EquipmentNumber || '-') + '</td><td class="mono">' + pr.Items.length + ' item</td>' +
-    '<td>' + statusDot(pr.Status) + '</td><td><button class="btn btn-ghost btn-sm" onclick="openPRDetail(\'' + pr.ID + '\')">Lihat Detail</button></td></tr>').join('');
+    '<td>' + statusDot(pr.Status) + '</td><td class="row-gap"><button class="btn btn-ghost btn-sm" onclick="openPRDetail(\'' + pr.ID + '\')">Lihat Detail</button>' +
+    '<button class="btn btn-ghost btn-sm" onclick="generateAndDownloadPRPdf(\'' + pr.ID + '\')">' + ICONS.pdf + 'Cetak PDF</button></td></tr>').join('');
   return '<div class="panel"><table class="table"><thead><tr>' +
     ['No. PR', 'Tanggal', 'Diminta Oleh', 'Departemen', 'Equipment', 'Jumlah Item', 'Status', ''].map((h) => '<th>' + h + '</th>').join('') +
     '</tr></thead><tbody>' + rows + '</tbody></table></div>';
@@ -570,10 +589,22 @@ function openPRDetail(id) {
       '<div class="tiny muted mono">' + it.kode + '</div></div><div class="mono">' + it.qty + ' ' + (part ? escapeHtml(part.Satuan || '') : escapeHtml(it.satuan || '')) + '</div></div>';
   }).join('');
   const actions = pr.Status === 'Menunggu'
-    ? '<div class="modal-actions"><button class="btn btn-danger" onclick="doUpdatePR(\'' + pr.ID + '\',\'Ditolak\')">Tolak</button>' +
-      '<button class="btn btn-solid" onclick="openApprovePRModal(\'' + pr.ID + '\')">Setujui &amp; Buat PO</button></div>' : '';
+    ? (pr.SignedFileUrl
+        ? '<div class="tiny muted section-label" style="margin-top:14px;">Dokumen Ditandatangani</div>' +
+          '<a href="' + pr.SignedFileUrl + '" target="_blank" rel="noopener" class="link-btn">' + ICONS.file + ' Lihat Dokumen ›</a>' +
+          '<div class="modal-actions"><button class="btn btn-danger" onclick="doUpdatePR(\'' + pr.ID + '\',\'Ditolak\')">Tolak</button>' +
+          '<button class="btn btn-solid" onclick="openApprovePRModal(\'' + pr.ID + '\')">Setujui &amp; Buat PO</button></div>'
+        : '<div class="tiny muted section-label" style="margin-top:14px;">Upload Dokumen Ditandatangani (wajib sebelum Setujui)</div>' +
+          '<input type="file" id="prSignedFile_' + pr.ID + '" accept="application/pdf,image/*" style="margin-bottom:10px; color: var(--text);">' +
+          '<div class="modal-actions"><button class="btn btn-danger" onclick="doUpdatePR(\'' + pr.ID + '\',\'Ditolak\')">Tolak</button>' +
+          '<button class="btn btn-ghost" onclick="submitUploadPRSigned(\'' + pr.ID + '\')">' + ICONS.upload + 'Upload Dokumen</button></div>')
+    : (pr.SignedFileUrl
+        ? '<div class="tiny muted section-label" style="margin-top:14px;">Dokumen Ditandatangani</div>' +
+          '<a href="' + pr.SignedFileUrl + '" target="_blank" rel="noopener" class="link-btn">' + ICONS.file + ' Lihat Dokumen ›</a>'
+        : '');
   const body = '<div class="grid-2-info mb3">' +
     '<div><div class="tiny muted">Diminta Oleh</div><div class="fw-medium">' + escapeHtml(pr.DimintaOleh || '-') + '</div></div>' +
+    '<div><div class="tiny muted">Jabatan</div><div class="fw-medium">' + escapeHtml(pr.Jabatan || '-') + '</div></div>' +
     '<div><div class="tiny muted">Departemen</div><div class="fw-medium">' + escapeHtml(pr.Departemen || '-') + '</div></div>' +
     '<div><div class="tiny muted">Tanggal</div><div class="fw-medium">' + fmtDate(pr.Tanggal) + '</div></div>' +
     '<div><div class="tiny muted">Status</div>' + statusDot(pr.Status) + '</div>' +
@@ -590,6 +621,40 @@ async function doUpdatePR(id, status) {
     closeModal();
     showToast(id + ' ditandai ' + status.toLowerCase() + '.');
   } catch (err) { showToast('Gagal: ' + (err.message || err), true); }
+}
+
+/* ---- Upload dokumen yang sudah ditandatangani (PR & PO) ---- */
+async function uploadSignedFile(file, folder, id) {
+  const ext = (file.name.split('.').pop() || 'dat').toLowerCase();
+  const fileName = folder + '/' + id + '_' + Date.now() + '.' + ext;
+  const { error } = await sb.storage.from('signed-documents').upload(fileName, file, { upsert: true, contentType: file.type });
+  if (error) throw error;
+  const { data } = sb.storage.from('signed-documents').getPublicUrl(fileName);
+  return data.publicUrl;
+}
+async function submitUploadPRSigned(id) {
+  const input = document.getElementById('prSignedFile_' + id);
+  if (!input || !input.files.length) { showToast('Pilih file terlebih dahulu.', true); return; }
+  try {
+    const url = await uploadSignedFile(input.files[0], 'pr', id);
+    const { error } = await sb.from('purchase_requests').update({ signed_file_url: url }).eq('id', id);
+    if (error) throw error;
+    await loadData();
+    openPRDetail(id);
+    showToast('Dokumen PR ' + id + ' berhasil diupload.');
+  } catch (err) { showToast('Gagal upload: ' + (err.message || err), true); }
+}
+async function submitUploadPOSigned(id) {
+  const input = document.getElementById('poSignedFile_' + id);
+  if (!input || !input.files.length) { showToast('Pilih file terlebih dahulu.', true); return; }
+  try {
+    const url = await uploadSignedFile(input.files[0], 'po', id);
+    const { error } = await sb.from('purchase_orders').update({ signed_file_url: url }).eq('id', id);
+    if (error) throw error;
+    await loadData();
+    openPODetail(id);
+    showToast('Dokumen PO ' + id + ' berhasil diupload.');
+  } catch (err) { showToast('Gagal upload: ' + (err.message || err), true); }
 }
 
 /* ---- Buat PR (multi item, tabel) ---- */
@@ -609,6 +674,7 @@ function openBuatPRModal() {
   const deptOptions = ['PLANT SM', 'PRODUKSI', 'HSE', 'HRGA'].map((d) => '<option>' + d + '</option>').join('');
   prItemIdx = 0;
   const body = '<div class="field"><label>Nama Pemohon</label><input id="prDiminta" type="text" placeholder="Nama pemohon"></div>' +
+    '<div class="field"><label>Jabatan</label><input id="prJabatan" type="text" placeholder="mis. Plant &amp; SM Dept Head"></div>' +
     '<div class="field"><label>Departemen</label><select id="prDept">' + deptOptions + '</select></div>' +
     '<div class="field"><label>Equipment Number</label><input id="prEquipment" type="text" placeholder="mis. EQ-1042"></div>' +
     '<datalist id="partOptions">' + datalistOptions + '</datalist>' +
@@ -651,6 +717,7 @@ async function ensurePartExistsClient(kode, namaItem, satuan) {
 async function submitBuatPR() {
   const dimintaInput = document.getElementById('prDiminta');
   const diminta = dimintaInput.value.trim();
+  const jabatan = document.getElementById('prJabatan').value.trim();
   const departemen = document.getElementById('prDept').value;
   const equipmentNumber = document.getElementById('prEquipment').value.trim();
   const keterangan = document.getElementById('prKeterangan').value.trim();
@@ -678,16 +745,119 @@ async function submitBuatPR() {
   if (items.length === 0) { showToast('Tambahkan minimal satu item.', true); return; }
   try {
     for (const it of items) await ensurePartExistsClient(it.kode, it.namaItem, it.satuan);
-    const prId = genId('PR');
-    let { error } = await sb.from('purchase_requests').insert({ id: prId, tanggal: todayStr(), diminta_oleh: diminta, departemen, equipment_number: equipmentNumber, keterangan, status: 'Menunggu' });
+    const prId = await nextPrNumber();
+    let { error } = await sb.from('purchase_requests').insert({ id: prId, tanggal: todayStr(), diminta_oleh: diminta, jabatan, departemen, equipment_number: equipmentNumber, keterangan, status: 'Menunggu' });
     if (error) throw error;
     const itemRows = items.map((it) => ({ pr_id: prId, part_kode: it.kode, nama_item: it.namaItem, satuan: it.satuan, qty: it.qty }));
     ({ error } = await sb.from('purchase_request_items').insert(itemRows));
     if (error) throw error;
     await loadData();
     currentPage = 'pr'; renderNav(); renderPage();
-    openModal('✅ PR Berhasil Diajukan', '<div class="small" style="margin-bottom:18px;">PR sudah tersimpan di Supabase dan menunggu persetujuan.</div><div class="modal-actions"><button class="btn btn-solid" onclick="closeModal()">OK</button></div>', 420);
+    generateAndDownloadPRPdf(prId);
+    openModal('✅ PR Berhasil Diajukan', '<div class="small" style="margin-bottom:18px;">PR ' + prId + ' sudah tersimpan di Supabase dan menunggu persetujuan. PDF form sudah ter-download.</div><div class="modal-actions"><button class="btn btn-solid" onclick="closeModal()">OK</button></div>', 420);
   } catch (err) { showToast('Gagal: ' + (err.message || err), true); }
+}
+
+/* ---- Generate PDF Purchase Request (form resmi) ---- */
+function generateAndDownloadPRPdf(prId) {
+  const pr = STATE.pr.find((p) => p.ID === prId);
+  if (!pr) { showToast('PR tidak ditemukan untuk PDF.', true); return; }
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const marginX = 14;
+
+    doc.rect(8, 8, pageWidth - 16, pageHeight - 16);
+
+    try { doc.addImage(LOGO_BASE64, 'PNG', pageWidth / 2 - 27, 12, 55, 8); } catch (e) { /* lanjut tanpa logo */ }
+    doc.setFontSize(7.5);
+    doc.setTextColor(60);
+    doc.text(JOB_SITE, pageWidth / 2, 23, { align: 'center' });
+    doc.setTextColor(0);
+
+    doc.setFontSize(15);
+    doc.setFont(undefined, 'bold');
+    doc.text('FORM PURCHASE REQUEST SPAREPART', pageWidth / 2, 32, { align: 'center' });
+    doc.setFont(undefined, 'normal');
+    doc.line(marginX, 36, pageWidth - marginX, 36);
+
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'bold'); doc.text('DATE :', marginX, 42); doc.setFont(undefined, 'normal');
+    doc.text(fmtDateLong(pr.Tanggal), marginX + 14, 42);
+    doc.setFont(undefined, 'bold'); doc.text('No.', pageWidth - marginX - 20, 42);
+    doc.setTextColor(200, 0, 0);
+    doc.text(pr.ID, pageWidth - marginX - 12, 42);
+    doc.setTextColor(0);
+    doc.setFont(undefined, 'normal');
+    doc.line(marginX, 45, pageWidth - marginX, 45);
+
+    const totalRows = Math.max(pr.Items.length, 10);
+    const body = [];
+    for (let i = 0; i < totalRows; i++) {
+      const it = pr.Items[i];
+      if (it) {
+        const part = STATE.parts.find((p) => p.Kode === it.kode);
+        body.push([i + 1, (part ? part.Nama : it.namaItem) || '-', it.kode, it.qty,
+          pr.EquipmentNumber || '-', pr.Keterangan || '-']);
+      } else {
+        body.push([i + 1, '', '', '', '', '']);
+      }
+    }
+
+    doc.autoTable({
+      startY: 50,
+      head: [['NO', 'NAMA BARANG', 'PART NUMBER', 'QTY', 'UNIT', 'KEPERLUAN']],
+      body,
+      styles: { fontSize: 8, lineColor: [0, 0, 0], lineWidth: 0.2, halign: 'center', valign: 'middle' },
+      headStyles: { fillColor: [30, 30, 30], textColor: 255, fontStyle: 'bold' },
+      columnStyles: {
+        0: { cellWidth: 10 },
+        1: { halign: 'left', cellWidth: 55 },
+        2: { cellWidth: 32 },
+        3: { cellWidth: 14 },
+        4: { cellWidth: 32 },
+        5: { halign: 'left', cellWidth: 35 },
+      },
+      theme: 'grid',
+      margin: { left: marginX, right: marginX },
+    });
+
+    const signY = doc.lastAutoTable.finalY + 20;
+    const col1 = marginX + 8, col2 = pageWidth / 2 - 15, col3 = pageWidth - marginX - 55;
+    doc.setFontSize(9);
+    doc.text('Dibuat Oleh,', col1, signY - 12);
+    doc.text('Diketahui oleh', col2, signY - 12);
+    doc.text('Disetujui Oleh,', col3, signY - 12);
+
+    doc.setFont(undefined, 'bold');
+    doc.text(pr.DimintaOleh || '-', col1, signY, { underline: true });
+    doc.text(PR_KNOWN_BY.name, col2, signY);
+    doc.text(PR_APPROVED_BY.name, col3, signY);
+    doc.setFont(undefined, 'normal');
+    doc.line(col1, signY + 1, col1 + doc.getTextWidth(pr.DimintaOleh || '-'), signY + 1);
+    doc.line(col2, signY + 1, col2 + doc.getTextWidth(PR_KNOWN_BY.name), signY + 1);
+    doc.line(col3, signY + 1, col3 + doc.getTextWidth(PR_APPROVED_BY.name), signY + 1);
+
+    doc.setFontSize(8.5);
+    doc.text(pr.Jabatan || '-', col1, signY + 5);
+    doc.text(PR_KNOWN_BY.title, col2, signY + 5);
+    doc.text(PR_APPROVED_BY.title, col3, signY + 5);
+
+    doc.setFontSize(8);
+    doc.text('Warehouse Transfer', marginX, pageHeight - 12);
+    doc.text('Page 1 of 1', pageWidth - marginX, pageHeight - 12, { align: 'right' });
+
+    doc.save('PR_' + pr.ID + '.pdf');
+  } catch (err) {
+    showToast('Gagal membuat PDF PR: ' + (err.message || err), true);
+  }
+}
+function fmtDateLong(d) {
+  const dt = new Date(d);
+  if (isNaN(dt.getTime())) return d;
+  return dt.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
 }
 
 /* ---- Setujui PR & Buat PO ---- */
@@ -765,8 +935,7 @@ function renderPOPage() {
     return '<tr class="b-top"><td class="mono accent">' + po.ID + '</td><td class="fw-medium">' + escapeHtml(po.Supplier || '-') + '</td>' +
       '<td>' + fmtDate(po.Tanggal) + '</td><td class="mono">' + rp(total) + '</td><td>' + statusDot(po.Status) + '</td>' +
       '<td class="row-gap"><button class="btn btn-ghost btn-sm" onclick="openPODetail(\'' + po.ID + '\')">Lihat Detail</button>' +
-      '<button class="btn btn-ghost btn-sm" onclick="generateAndDownloadPOPdf(\'' + po.ID + '\')">' + ICONS.pdf + 'Cetak PDF</button>' +
-      (po.Status === 'Draft' ? '<button class="btn btn-solid btn-sm" onclick="doKirimPO(\'' + po.ID + '\')">' + ICONS.send + 'Kirim</button>' : '') + '</td></tr>';
+      '<button class="btn btn-ghost btn-sm" onclick="generateAndDownloadPOPdf(\'' + po.ID + '\')">' + ICONS.pdf + 'Cetak PDF</button></td></tr>';
   }).join('');
   return '<div class="panel"><table class="table"><thead><tr>' +
     ['No. PO', 'Supplier', 'Tanggal', 'Total', 'Status', ''].map((h) => '<th>' + h + '</th>').join('') + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
@@ -780,6 +949,18 @@ function openPODetail(id) {
       '<div class="tiny muted mono">' + it.kode + ' · ' + it.qty + ' ' + (part ? escapeHtml(part.Satuan || '') : '') + ' x ' + rp(it.harga) + '</div></div>' +
       '<div class="mono">' + rp(it.qty * it.harga) + '</div></div>';
   }).join('');
+  const uploadSection = po.Status === 'Draft'
+    ? (po.SignedFileUrl
+        ? '<div class="tiny muted section-label" style="margin-top:14px;">Dokumen Ditandatangani</div>' +
+          '<a href="' + po.SignedFileUrl + '" target="_blank" rel="noopener" class="link-btn">' + ICONS.file + ' Lihat Dokumen ›</a>' +
+          '<div class="modal-actions"><button class="btn btn-solid" onclick="doKirimPO(\'' + po.ID + '\')">' + ICONS.send + 'Kirim ke Supplier</button></div>'
+        : '<div class="tiny muted section-label" style="margin-top:14px;">Upload Dokumen Ditandatangani (wajib sebelum Kirim)</div>' +
+          '<input type="file" id="poSignedFile_' + po.ID + '" accept="application/pdf,image/*" style="margin-bottom:10px; color: var(--text);">' +
+          '<div class="modal-actions"><button class="btn btn-ghost" onclick="submitUploadPOSigned(\'' + po.ID + '\')">' + ICONS.upload + 'Upload Dokumen</button></div>')
+    : (po.SignedFileUrl
+        ? '<div class="tiny muted section-label" style="margin-top:14px;">Dokumen Ditandatangani</div>' +
+          '<a href="' + po.SignedFileUrl + '" target="_blank" rel="noopener" class="link-btn">' + ICONS.file + ' Lihat Dokumen ›</a>'
+        : '');
   const body = '<div class="grid-2-info mb3"><div><div class="tiny muted">Supplier</div><div class="fw-medium">' + escapeHtml(po.Supplier || '-') + '</div></div>' +
     '<div><div class="tiny muted">Tanggal</div><div class="fw-medium">' + fmtDate(po.Tanggal) + '</div></div>' +
     '<div><div class="tiny muted">Due Date</div><div class="fw-medium">' + (po.DueDate ? fmtDate(po.DueDate) : '-') + '</div></div>' +
@@ -788,7 +969,8 @@ function openPODetail(id) {
     '<div><div class="tiny muted">No. Quotation</div><div class="fw-medium">' + escapeHtml(po.QuotationNo || '-') + '</div></div></div>' +
     '<div class="tiny muted section-label">Item Dipesan</div>' + itemsHtml +
     '<div class="row-between total-row"><span>Total</span><span class="mono">' + rp(total) + '</span></div>' +
-    (po.Notes ? '<div class="tiny muted section-label" style="margin-top:14px;">Notes</div><div class="small">' + escapeHtml(po.Notes) + '</div>' : '');
+    (po.Notes ? '<div class="tiny muted section-label" style="margin-top:14px;">Notes</div><div class="small">' + escapeHtml(po.Notes) + '</div>' : '') +
+    uploadSection;
   openModal(po.ID, body);
 }
 async function doKirimPO(id) {
@@ -796,6 +978,7 @@ async function doKirimPO(id) {
     const { error } = await sb.from('purchase_orders').update({ status: 'Dikirim' }).eq('id', id);
     if (error) throw error;
     await loadData();
+    closeModal();
     showToast(id + ' telah dikirim ke supplier.');
   } catch (err) { showToast('Gagal: ' + (err.message || err), true); }
 }
