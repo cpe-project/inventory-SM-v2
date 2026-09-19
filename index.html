@@ -96,6 +96,7 @@ nav.tabs{display:flex;flex-direction:column;gap:2px;margin-top:4px;}
 .eyebrow{font-size:10.5px;color:var(--teal);text-transform:uppercase;letter-spacing:.14em;font-weight:600;margin-bottom:6px;}
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px;}
 .kpi-grid.kpi-grid-5{grid-template-columns:repeat(5,1fr);}
+.kpi-grid.kpi-grid-3{grid-template-columns:repeat(3,1fr);}
 .kpi-card{background:var(--bg-panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;position:relative;overflow:hidden;transition:border-color .2s,box-shadow .2s;}
 .kpi-card:hover{border-color:var(--accent,var(--amber));box-shadow:0 0 20px var(--accent,var(--amber))18;}
 .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent,var(--amber));}
@@ -387,10 +388,6 @@ table.cat-table td.pn{font-family:'JetBrains Mono';color:var(--teal);}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
         Katalog Visual
       </button>
-      <button class="tab-btn nav-editor-only" data-page="mega">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-        Dashboard MEGA
-      </button>
       <button class="tab-btn nav-editor-only" data-page="upload">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 21h14"/></svg>
         Update Data (Excel)
@@ -447,50 +444,24 @@ table.cat-table td.pn{font-family:'JetBrains Mono';color:var(--teal);}
           <div class="ms-tags" id="msTagsWH"></div>
         </div>
 
-        <div class="ms-wrap" id="msWrapCL">
-          <div class="ms-label">Filter Class</div>
-          <div class="ms-trigger" id="msTriggerCL">
-            <span id="msTriggerCLText">Semua Class</span>
-            <span class="caret">▼</span>
-          </div>
-          <div class="ms-dropdown hidden" id="msDropCL">
-            <div id="msListCL"></div>
-            <div class="ms-actions">
-              <button onclick="msSelectAll('CL')">Pilih Semua</button>
-              <button onclick="msClearAll('CL')">Reset</button>
-            </div>
-          </div>
-          <div class="ms-tags" id="msTagsCL"></div>
-        </div>
-
         <div class="dash-filter-reset">
           <button class="btn ghost small" onclick="msResetAll()">Reset Semua Filter</button>
         </div>
         <span class="filter-active-note" id="dashFilterNote" style="display:none;">⚡ Filter aktif</span>
       </div>
-      <div class="kpi-grid kpi-grid-5">
+      <div class="kpi-grid kpi-grid-3">
         <div class="kpi-card" style="--accent:var(--amber)"><div class="kpi-label">Total Item</div><div class="kpi-value" id="kpiItems"><span class="spinner"></span></div><div class="kpi-sub" id="kpiItemsSub">memuat...</div></div>
         <div class="kpi-card" style="--accent:var(--teal)"><div class="kpi-label">Total Gudang</div><div class="kpi-value" id="kpiWH"><span class="spinner"></span></div><div class="kpi-sub">kode warehouse aktif</div></div>
-        <div class="kpi-card" style="--accent:#9D7CF2"><div class="kpi-label">Nilai Own Stock</div><div class="kpi-value" id="kpiOwn"><span class="spinner"></span></div><div class="kpi-sub">amount own stok</div></div>
-        <div class="kpi-card" style="--accent:var(--red)"><div class="kpi-label">Nilai Consignment</div><div class="kpi-value" id="kpiConsign"><span class="spinner"></span></div><div class="kpi-sub">amount consign</div></div>
-        <div class="kpi-card" style="--accent:var(--green)"><div class="kpi-label">Total Amount</div><div class="kpi-value" id="kpiValue"><span class="spinner"></span></div><div class="kpi-sub">own stock + consignment</div></div>
+        <div class="kpi-card" style="--accent:var(--green)"><div class="kpi-label">Total Qty</div><div class="kpi-value" id="kpiQty"><span class="spinner"></span></div><div class="kpi-sub">akumulasi semua item</div></div>
       </div>
       <div class="grid-2">
-        <div class="panel">
-          <h3>Distribusi Item per Class <span class="tag">jumlah item</span>
-            <button onclick="togglePanel('chartClassWrap','btnChartClass')" id="btnChartClass" style="font-size:10px;padding:3px 10px;border-radius:6px;border:1px solid var(--line);background:var(--bg-panel);color:var(--ink-dim);cursor:pointer;margin-left:auto;">▲ Sembunyikan</button>
-          </h3>
-          <div id="chartClassWrap"><div class="chart-wrap"><canvas id="chartClassDash"></canvas></div></div>
-        </div>
         <div class="panel">
           <h3>Top 8 Gudang <span class="tag">by jumlah item</span>
             <button onclick="togglePanel('topWHListWrap','btnTopWH')" id="btnTopWH" style="font-size:10px;padding:3px 10px;border-radius:6px;border:1px solid var(--line);background:var(--bg-panel);color:var(--ink-dim);cursor:pointer;margin-left:auto;">▲ Sembunyikan</button>
           </h3>
           <div id="topWHListWrap"><div id="topWHList"><div class="empty-state"><span class="spinner"></span></div></div></div>
         </div>
-      </div>
-      <div class="grid-2" style="grid-template-columns:1fr;">
-        <div class="panel"><h3>Amount Inventory per Warehouse <span class="tag">nilai stock</span></h3><div id="warehouseAmountBox"><div class="empty-state"><span class="spinner"></span></div></div></div>
+        <div class="panel"><h3>Qty per Warehouse <span class="tag">jumlah stock</span></h3><div id="warehouseAmountBox"><div class="empty-state"><span class="spinner"></span></div></div></div>
       </div>
     </section>
 
@@ -498,10 +469,8 @@ table.cat-table td.pn{font-family:'JetBrains Mono';color:var(--teal);}
     <section class="page" id="page-katalog">
       <div class="page-head"><div><div class="eyebrow">Master Data</div><h1>Katalog Stock</h1><p>Cari, filter, dan urutkan seluruh item inventory.</p></div></div>
       <div class="toolbar">
-        <input type="text" id="searchInput" placeholder="Cari nama item, part number, stock code, deskripsi...">
+        <input type="text" id="searchInput" placeholder="Cari nama item, PN, merk, part of...">
         <select id="filterWarehouse"><option value="">Semua Gudang</option></select>
-        <select id="filterClass"><option value="">Semua Class</option></select>
-        <select id="filterMnemonic"><option value="">Semua Brand/Mnemonic</option></select>
         <button class="btn ghost small" id="resetFiltersBtn">Reset</button>
         <button class="btn small" id="exportPdfBtn" style="margin-left:auto;background:var(--amber);color:#1A1208;display:flex;align-items:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Export PDF</button>
         <span class="result-count" id="resultCount"></span>
@@ -511,16 +480,14 @@ table.cat-table td.pn{font-family:'JetBrains Mono';color:var(--teal);}
           <thead><tr>
             <th style="width:36px;"></th>
             <th data-col="warehouse">Gudang<span class="arrow"></span></th>
-            <th data-col="pn">Part Number<span class="arrow"></span></th>
-            <th data-col="stock_code">Stock Code<span class="arrow"></span></th>
-            <th data-col="mnemonic">Mnemonic / Brand<span class="arrow"></span></th>
-            <th data-col="class">Class<span class="arrow"></span></th>
-            <th data-col="item_name">Item / Deskripsi<span class="arrow"></span></th>
-            <th data-col="uoi">UOI</th>
-            <th class="num" data-col="total_soh">Total SOH<span class="arrow"></span></th>
-            <th class="num" data-col="available">Available<span class="arrow"></span></th>
+            <th data-col="stock_code">PN<span class="arrow"></span></th>
+            <th data-col="item_name">Nama Part<span class="arrow"></span></th>
+            <th class="num" data-col="qty">Qty<span class="arrow"></span></th>
+            <th data-col="uoi">Satuan</th>
+            <th data-col="merk">Merk<span class="arrow"></span></th>
+            <th data-col="part_of">Part of<span class="arrow"></span></th>
           </tr></thead>
-          <tbody id="catTableBody"><tr class="loading-row"><td colspan="10"><span class="spinner"></span> Memuat data...</td></tr></tbody>
+          <tbody id="catTableBody"><tr class="loading-row"><td colspan="8"><span class="spinner"></span> Memuat data...</td></tr></tbody>
         </table>
       </div>
       <div class="pagination">
@@ -533,10 +500,8 @@ table.cat-table td.pn{font-family:'JetBrains Mono';color:var(--teal);}
     <section class="page" id="page-katalogvisual">
       <div class="page-head"><div><div class="eyebrow">Master Data · Tampilan Visual</div><h1>Katalog Visual</h1><p>Tampilan kartu bergambar per item inventory.</p></div></div>
       <div class="toolbar">
-        <input type="text" id="searchInput2" placeholder="Cari nama item, part number, deskripsi...">
+        <input type="text" id="searchInput2" placeholder="Cari nama item, PN, merk, part of...">
         <select id="filterWarehouse2"><option value="">Semua Gudang</option></select>
-        <select id="filterClass2"><option value="">Semua Class</option></select>
-        <select id="filterMnemonic2"><option value="">Semua Brand/Mnemonic</option></select>
         <label style="display:flex;align-items:center;gap:6px;font-size:12.3px;color:var(--ink-dim);cursor:pointer;">
           <input type="checkbox" id="onlyWithImageChk" style="accent-color:var(--amber);"> Hanya yang punya foto
         </label>
@@ -550,107 +515,6 @@ table.cat-table td.pn{font-family:'JetBrains Mono';color:var(--teal);}
       </div>
     </section>
 
-    <!-- DASHBOARD MEGA -->
-    <section class="page" id="page-mega">
-      <div class="page-head">
-        <div>
-          <div class="eyebrow">Warehouse Khusus</div>
-          <h1>Dashboard Warehouse MEGA</h1>
-          <p>Analisis lengkap inventory khusus gudang MEGA — nilai, jumlah item, dan breakdown per class.</p>
-        </div>
-      </div>
-
-      <!-- KPI MEGA -->
-      <div class="kpi-grid kpi-grid-5">
-        <div class="kpi-card" style="--accent:var(--amber)"><div class="kpi-label">Total Item MEGA</div><div class="kpi-value" id="megaKpiItems"><span class="spinner"></span></div><div class="kpi-sub">item di gudang MEGA</div></div>
-        <div class="kpi-card" style="--accent:var(--teal)"><div class="kpi-label">Total SOH MEGA</div><div class="kpi-value" id="megaKpiSOH"><span class="spinner"></span></div><div class="kpi-sub">stock on hand</div></div>
-        <div class="kpi-card" style="--accent:#9D7CF2"><div class="kpi-label">Nilai Own Stock</div><div class="kpi-value" id="megaKpiOwn"><span class="spinner"></span></div><div class="kpi-sub">amount own stok</div></div>
-        <div class="kpi-card" style="--accent:var(--red)"><div class="kpi-label">Nilai Consignment</div><div class="kpi-value" id="megaKpiConsign"><span class="spinner"></span></div><div class="kpi-sub">amount consign</div></div>
-        <div class="kpi-card" style="--accent:var(--green)"><div class="kpi-label">Total Amount Inventory</div><div class="kpi-value" id="megaKpiTotalAmount"><span class="spinner"></span></div><div class="kpi-sub">own stock + consignment</div></div>
-      </div>
-
-      <!-- 2 CHARTS -->
-      <div class="grid-2">
-        <div class="panel">
-          <h3>Nilai Inventory MEGA per Class <span class="tag">Rp</span>
-            <button onclick="togglePanel('megaChartValueWrap','btnMegaValue')" id="btnMegaValue" style="font-size:10px;padding:3px 10px;border-radius:6px;border:1px solid var(--line);background:var(--bg-panel);color:var(--ink-dim);cursor:pointer;margin-left:auto;">▲ Sembunyikan</button>
-          </h3>
-          <div id="megaChartValueWrap"><div class="chart-wrap tall"><canvas id="megaChartValue"></canvas></div></div>
-        </div>
-        <div class="panel">
-          <h3>Jumlah Item MEGA per Class <span class="tag">item</span>
-            <button onclick="togglePanel('megaChartCountWrap','btnMegaCount')" id="btnMegaCount" style="font-size:10px;padding:3px 10px;border-radius:6px;border:1px solid var(--line);background:var(--bg-panel);color:var(--ink-dim);cursor:pointer;margin-left:auto;">▲ Sembunyikan</button>
-          </h3>
-          <div id="megaChartCountWrap"><div class="chart-wrap tall"><canvas id="megaChartCount"></canvas></div></div>
-        </div>
-      </div>
-
-      <!-- DETAIL TABLE -->
-      <div class="panel">
-        <h3>Detail per Class — Warehouse MEGA <span class="tag">klik baris → filter Katalog</span>
-          <button onclick="togglePanel('megaDetailTableWrap','btnMegaDetail')" id="btnMegaDetail" style="font-size:10px;padding:3px 10px;border-radius:6px;border:1px solid var(--line);background:var(--bg-panel);color:var(--ink-dim);cursor:pointer;margin-left:auto;">▲ Sembunyikan</button>
-        </h3>
-        <div id="megaDetailTableWrap">
-        <table class="data-mini" id="megaDetailTable">
-          <thead>
-            <tr>
-              <th>Class</th>
-              <th class="num">Jumlah Item</th>
-              <th class="num">% Item</th>
-              <th class="num">Total SOH</th>
-              <th class="num">Nilai Own Stock</th>
-              <th class="num">Nilai Consign</th>
-              <th class="num">Total Nilai</th>
-              <th class="num">% Nilai</th>
-            </tr>
-          </thead>
-          <tbody id="megaDetailTbody"><tr><td colspan="8" style="text-align:center;padding:30px;"><span class="spinner"></span></td></tr></tbody>
-        </table>
-        </div>
-      </div>
-
-      <!-- CLASS A&C READINESS (termasuk SOH=0) -->
-      <div class="grid-2" style="grid-template-columns:1fr;">
-        <div class="panel">
-          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
-            <h3 style="margin:0;">Class A & C — Readiness MEGA <span class="tag">dari total <span id="acReadTotal">...</span> item</span></h3>
-            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-              <button id="exportReadinessBtn" class="btn small" style="background:var(--teal);color:#03222b;display:flex;align-items:center;gap:6px;" onclick="exportReadinessExcel()">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Export Excel
-              </button>
-              <button id="sendReportBtn" class="btn small" style="background:var(--amber);color:#1A1208;display:flex;align-items:center;gap:6px;">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>
-                Kirim Laporan Stock Rendah
-              </button>
-              <button onclick="togglePanel('acReadinessPanelBody','btnAcReadiness')" id="btnAcReadiness" style="font-size:11px;padding:6px 12px;border-radius:6px;border:1px solid var(--line);background:var(--bg-panel);color:var(--ink-dim);cursor:pointer;">▲ Sembunyikan</button>
-            </div>
-          </div>
-          <div id="acReadinessPanelBody">
-            <div id="megaLowStockBox" style="margin-bottom:14px;"></div>
-            <div id="acReadinessBox"><div class="empty-state"><span class="spinner"></span></div></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- TREND NILAI INVENTORY CLASS A & C -->
-      <div class="grid-2" style="grid-template-columns:1fr;">
-        <div class="panel">
-          <h3 style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-            <span>Trend Nilai Inventory Class A & C — MEGA <span class="tag" id="acTrendRange">30 hari terakhir</span></span>
-            <button onclick="togglePanel('acTrendPanelBody','btnAcTrend')" id="btnAcTrend" style="font-size:11px;padding:6px 12px;border-radius:6px;border:1px solid var(--line);background:var(--bg-panel);color:var(--ink-dim);cursor:pointer;">▲ Sembunyikan</button>
-          </h3>
-          <div id="acTrendPanelBody">
-            <div id="acTrendEmpty" style="display:none;color:var(--ink-faint);font-size:12.5px;padding:20px 0;text-align:center;">
-              Data trend baru mulai direkam. Grafik akan terisi seiring waktu (1 titik data per hari).
-            </div>
-            <div class="chart-wrap tall" id="acTrendChartWrap"><canvas id="acTrendChart"></canvas></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- UPLOAD -->
     <section class="page" id="page-upload">
       <div class="mobile-bar">
         <button onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
@@ -670,6 +534,14 @@ table.cat-table td.pn{font-family:'JetBrains Mono';color:var(--teal);}
         <!-- UPLOAD PANEL -->
         <div class="panel" style="display:flex;flex-direction:column;gap:14px;">
           <h3 style="margin:0;">Upload File Excel</h3>
+
+          <!-- WAREHOUSE (wajib diisi, berlaku untuk semua baris di file) -->
+          <div>
+            <label style="font-size:12px;color:var(--ink-dim);font-weight:600;display:block;margin-bottom:6px;">Warehouse untuk file ini <span style="color:var(--red);">*</span></label>
+            <input type="text" id="uploadWarehouseInput" list="uploadWhList" placeholder="Contoh: MEGA" style="width:100%;padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:13px;">
+            <datalist id="uploadWhList"></datalist>
+            <div style="font-size:11px;color:var(--ink-faint);margin-top:4px;">Berlaku untuk semua baris di file — file ini tidak punya kolom Warehouse.</div>
+          </div>
 
           <!-- DROPZONE -->
           <div class="dropzone" id="dropzone" style="border:2px dashed var(--line);border-radius:12px;padding:32px 20px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;background:var(--bg);">
@@ -864,7 +736,7 @@ let totalItems2    = 0;
 let sortCol        = 'item_name';
 let sortAsc        = true;
 let dashStats      = null;
-let filterOptions  = { warehouses:[], classes:[], mnemonics:[] };
+let filterOptions  = { warehouses:[] };
 let activeModalKey = null;  // "warehouse|stock_code"
 let imgCache       = new Map();  // key -> publicUrl (foto pertama, untuk thumbnail)
 let modalImgList   = [];         // daftar semua foto item yang sedang dibuka di modal
@@ -966,7 +838,6 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
     const pg=btn.dataset.page;
     if(pg==='katalog')      { populateFilterSelects(); fetchKatalogPage(); }
     if(pg==='katalogvisual'){ populateVisualFilterSelects(); fetchVisualPage(); }
-    if(pg==='mega')         { loadMegaDashboard(); }
     if(pg==='galeri')       { loadGallery(); }
   });
 });
@@ -976,58 +847,36 @@ async function loadFilterOptions(){
   const { data } = await sb.rpc('get_filter_options');
   if(data){
     filterOptions=data;
-    // fallback: jika mnemonics kosong, fetch langsung dari tabel
-    if(!filterOptions.mnemonics || !filterOptions.mnemonics.length){
-      const { data:mn } = await sb.from('items').select('mnemonic').neq('mnemonic','').order('mnemonic');
-      if(mn) filterOptions.mnemonics=[...new Set(mn.map(r=>r.mnemonic).filter(Boolean))].sort();
-    }
     populateFilterSelects();
     populateVisualFilterSelects();
     msInit();
+    const dl=document.getElementById('uploadWhList');
+    if(dl) dl.innerHTML=(filterOptions.warehouses||[]).map(w=>`<option value="${esc(w)}">`).join('');
   }
 }
 function populateFilterSelects(){
   const wh=document.getElementById('filterWarehouse');
-  const cl=document.getElementById('filterClass');
-  const mn=document.getElementById('filterMnemonic');
-  const curWh=wh.value, curCl=cl.value, curMn=mn.value;
+  const curWh=wh.value;
   wh.innerHTML='<option value="">Semua Gudang</option>'+(filterOptions.warehouses||[]).map(w=>`<option value="${esc(w)}">${esc(w)}</option>`).join('');
-  cl.innerHTML='<option value="">Semua Class</option>'+(filterOptions.classes||[]).map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
-  mn.innerHTML='<option value="">Semua Brand/Mnemonic</option>'+(filterOptions.mnemonics||[]).map(m=>`<option value="${esc(m)}">${esc(m)}</option>`).join('');
-  wh.value=curWh; cl.value=curCl; mn.value=curMn;
+  wh.value=curWh;
 }
 function populateVisualFilterSelects(){
   const wh=document.getElementById('filterWarehouse2');
-  const cl=document.getElementById('filterClass2');
-  const mn=document.getElementById('filterMnemonic2');
-  const curWh=wh.value, curCl=cl.value, curMn=mn.value;
+  const curWh=wh.value;
   wh.innerHTML='<option value="">Semua Gudang</option>'+(filterOptions.warehouses||[]).map(w=>`<option value="${esc(w)}">${esc(w)}</option>`).join('');
-  cl.innerHTML='<option value="">Semua Class</option>'+(filterOptions.classes||[]).map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
-  mn.innerHTML='<option value="">Semua Brand/Mnemonic</option>'+(filterOptions.mnemonics||[]).map(m=>`<option value="${esc(m)}">${esc(m)}</option>`).join('');
-  wh.value=curWh; cl.value=curCl; mn.value=curMn;
+  wh.value=curWh;
 }
 
-/* ---------- MULTI-SELECT FILTER (DASHBOARD) ---------- */
+/* ---------- MULTI-SELECT FILTER (DASHBOARD) — warehouse saja ---------- */
 let msSelectedWH = new Set();
-let msSelectedCL = new Set();
 
 function msInit(){
-  // populate warehouses
   const whs = filterOptions.warehouses || [];
   document.getElementById('msListWH').innerHTML = whs.map(w =>
     `<label class="ms-option" data-val="${esc(w)}">
       <input type="checkbox" value="${esc(w)}" onchange="msToggle('WH','${esc(w)}')"> ${esc(w)}
     </label>`).join('');
 
-  // populate classes with color chips
-  const cls = filterOptions.classes || [];
-  document.getElementById('msListCL').innerHTML = cls.map(c =>
-    `<label class="ms-option" data-val="${esc(c)}">
-      <input type="checkbox" value="${esc(c)}" onchange="msToggle('CL','${esc(c)}')">
-      <span class="chip" style="background:${classColor(c)}22;color:${classColor(c)};font-size:10px;">${esc(c)}</span>
-    </label>`).join('');
-
-  // search in warehouse dropdown
   document.getElementById('msSearchWH').addEventListener('input', e => {
     const q = e.target.value.toLowerCase();
     document.querySelectorAll('#msListWH .ms-option').forEach(opt => {
@@ -1035,67 +884,53 @@ function msInit(){
     });
   });
 
-  // toggle dropdowns
   document.getElementById('msTriggerWH').addEventListener('click', e => {
     e.stopPropagation();
     document.getElementById('msDropWH').classList.toggle('hidden');
-    document.getElementById('msDropCL').classList.add('hidden');
     document.getElementById('msTriggerWH').classList.toggle('open');
-  });
-  document.getElementById('msTriggerCL').addEventListener('click', e => {
-    e.stopPropagation();
-    document.getElementById('msDropCL').classList.toggle('hidden');
-    document.getElementById('msDropWH').classList.add('hidden');
-    document.getElementById('msTriggerCL').classList.toggle('open');
   });
   document.addEventListener('click', () => {
     document.getElementById('msDropWH').classList.add('hidden');
-    document.getElementById('msDropCL').classList.add('hidden');
     document.getElementById('msTriggerWH').classList.remove('open');
-    document.getElementById('msTriggerCL').classList.remove('open');
   });
   document.getElementById('msDropWH').addEventListener('click', e => e.stopPropagation());
-  document.getElementById('msDropCL').addEventListener('click', e => e.stopPropagation());
 }
 
 function msToggle(key, val){
-  const set = key==='WH' ? msSelectedWH : msSelectedCL;
+  const set = msSelectedWH;
   if(set.has(val)) set.delete(val); else set.add(val);
   msRenderTags(key);
   msTriggerLoad();
 }
 function msSelectAll(key){
-  const set = key==='WH' ? msSelectedWH : msSelectedCL;
-  const opts = key==='WH' ? filterOptions.warehouses : filterOptions.classes;
-  (opts||[]).forEach(v => set.add(v));
+  const set = msSelectedWH;
+  (filterOptions.warehouses||[]).forEach(v => set.add(v));
   document.querySelectorAll(`#msList${key} input[type=checkbox]`).forEach(cb => cb.checked=true);
   msRenderTags(key); msTriggerLoad();
 }
 function msClearAll(key){
-  const set = key==='WH' ? msSelectedWH : msSelectedCL;
-  set.clear();
+  msSelectedWH.clear();
   document.querySelectorAll(`#msList${key} input[type=checkbox]`).forEach(cb => cb.checked=false);
   msRenderTags(key); msTriggerLoad();
 }
-function msResetAll(){ msClearAll('WH'); msClearAll('CL'); }
+function msResetAll(){ msClearAll('WH'); }
 
 function msRenderTags(key){
-  const set = key==='WH' ? msSelectedWH : msSelectedCL;
+  const set = msSelectedWH;
   const tagsEl = document.getElementById(`msTags${key}`);
   const triggerText = document.getElementById(`msTrigger${key}Text`);
   if(set.size===0){
     tagsEl.innerHTML='';
-    triggerText.textContent = key==='WH' ? 'Semua Gudang' : 'Semua Class';
+    triggerText.textContent = 'Semua Gudang';
   } else {
     triggerText.textContent = `${set.size} dipilih`;
     tagsEl.innerHTML=[...set].map(v=>`
       <span class="ms-tag">
-        ${key==='CL'?`<span style="color:${classColor(v)}">■</span> `:''}${esc(v)}
+        ${esc(v)}
         <span class="rm" onclick="msToggle('${key}','${esc(v)}')">✕</span>
       </span>`).join('');
   }
-  const anyActive = msSelectedWH.size>0 || msSelectedCL.size>0;
-  document.getElementById('dashFilterNote').style.display = anyActive ? 'inline' : 'none';
+  document.getElementById('dashFilterNote').style.display = set.size>0 ? 'inline' : 'none';
 }
 
 let dashLoadDebounce;
@@ -1107,20 +942,17 @@ function msTriggerLoad(){
 /* ---------- dashboard ---------- */
 async function loadDashboard(){
   // Show loading on KPIs
-  ['kpiItems','kpiWH','kpiOwn','kpiConsign','kpiValue'].forEach(id=>{
+  ['kpiItems','kpiWH','kpiQty'].forEach(id=>{
     document.getElementById(id).innerHTML='<span class="spinner"></span>';
   });
 
   const filterWH = msSelectedWH.size>0 ? [...msSelectedWH] : null;
-  const filterCL = msSelectedCL.size>0 ? [...msSelectedCL] : null;
 
   const params = {};
   if(filterWH) params.filter_warehouses = filterWH;
-  if(filterCL) params.filter_classes = filterCL;
 
-  // Try filtered RPC first, fallback to original
   let data;
-  if(filterWH || filterCL){
+  if(filterWH){
     const res = await sb.rpc('get_dashboard_stats_filtered', params);
     data = res.data;
   }
@@ -1131,62 +963,12 @@ async function loadDashboard(){
   if(!data) return;
   dashStats=data;
 
-  // Nilai own stock & consignment — RPC terpisah (get_own_consign_totals)
-  let ownConsignData = null;
-  try{
-    const ocRes = await sb.rpc('get_own_consign_totals', {
-      filter_warehouses: filterWH,
-      filter_classes: filterCL
-    });
-    ownConsignData = ocRes.data;
-  }catch(e){ /* function belum ada di Supabase, akan tampil 0 */ }
-
   document.getElementById('kpiItems').textContent   = fmtNum(data.total_items);
   document.getElementById('kpiItemsSub').textContent= `di ${data.total_warehouses} gudang`;
   document.getElementById('kpiWH').textContent      = fmtNum(data.total_warehouses);
-  document.getElementById('kpiOwn').textContent     = fmtRupiah(ownConsignData?.total_own_value ?? 0);
-  document.getElementById('kpiConsign').textContent = fmtRupiah(ownConsignData?.total_consign_value ?? 0);
-  document.getElementById('kpiValue').textContent   = fmtRupiah(data.total_value ?? ((ownConsignData?.total_own_value||0) + (ownConsignData?.total_consign_value||0)));
+  document.getElementById('kpiQty').textContent     = fmtNum(data.total_qty ?? 0);
   document.getElementById('navCatCount').textContent= fmtNum(data.total_items);
   document.getElementById('footUpdated').textContent= new Date().toLocaleString('id-ID',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
-
-  // donut chart (class)
-  const cs=data.class_stats||[];
-  const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
-  const legendColor = isDark ? '#E2ECF8' : '#0A1628';
-  if(chartClassDash) chartClassDash.destroy();
-  chartClassDash=new Chart(document.getElementById('chartClassDash'),{
-    type:'doughnut',
-    data:{ labels:cs.map(c=>c.class||'?'), datasets:[{ data:cs.map(c=>c.item_count), backgroundColor:cs.map(c=>classColor(c.class||'')), borderWidth:0 }]},
-    options:{
-      plugins:{
-        legend:{
-          position:'right',
-          labels:{
-            color: legendColor,
-            boxWidth:12,
-            font:{size:11},
-            generateLabels: chart => {
-              const data = chart.data;
-              return data.labels.map((label,i)=>({
-                text: `${label}  ${fmtNum(data.datasets[0].data[i])}`,
-                fillStyle: data.datasets[0].backgroundColor[i],
-                strokeStyle: 'transparent',
-                fontColor: legendColor,
-                index: i
-              }));
-            }
-          }
-        },
-        tooltip:{
-          callbacks:{
-            label: ctx => ` ${ctx.label}: ${fmtNum(ctx.parsed)} item`
-          }
-        }
-      },
-      cutout:'62%'
-    }
-  });
 
   // top warehouses
   const tw=data.top_warehouses||[];
@@ -1196,16 +978,13 @@ async function loadDashboard(){
     <div class="bar-track"><div class="bar-fill" style="width:${(w.item_count/maxWH*100).toFixed(1)}%"></div></div>
     <span class="mono" style="width:54px;text-align:right;color:var(--ink-dim);font-size:12px;">${fmtNum(w.item_count)}</span></div>`).join('');
 
-  // top value
-  // Top 10 Item dihapus
+  // Qty per Warehouse — agregasi di server via RPC
+  const { data: warehouseQty } = await sb.rpc('get_warehouse_qty_inventory');
 
-  // Warehouse Amount Inventory — agregasi di server via RPC
-  const { data: warehouseAmt } = await sb.rpc('get_warehouse_amount_inventory');
-
-  const whList = (warehouseAmt||[])
-    .filter(r=>r.total>0)
-    .sort((a,b)=>b.total-a.total);
-  const maxAmt = whList[0]?.total||1;
+  const whList = (warehouseQty||[])
+    .filter(r=>r.total_qty>0)
+    .sort((a,b)=>b.total_qty-a.total_qty);
+  const maxQty = whList[0]?.total_qty||1;
 
   document.getElementById('warehouseAmountBox').innerHTML = whList.length===0
     ? `<div style="color:var(--ink-faint);font-size:12.5px;padding:8px 0;">Tidak ada data.</div>`
@@ -1214,10 +993,10 @@ async function loadDashboard(){
           <div>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
               <span class="mono" style="font-size:12px;color:var(--ink);font-weight:600;">${esc(r.warehouse)}</span>
-              <span class="mono" style="font-size:11px;color:var(--amber);">${fmtRupiah(r.total)}</span>
+              <span class="mono" style="font-size:11px;color:var(--amber);">${fmtNum(r.total_qty)}</span>
             </div>
             <div class="bar-track" style="height:5px;">
-              <div class="bar-fill" style="width:${(r.total/maxAmt*100).toFixed(1)}%;"></div>
+              <div class="bar-fill" style="width:${(r.total_qty/maxQty*100).toFixed(1)}%;"></div>
             </div>
           </div>`).join('')}
       </div>`;
@@ -1240,7 +1019,7 @@ function buildSearchFilter(query, q){
     terms.forEach(term=>{
       const t = term.toLowerCase();
       query = query.or(
-        `item_name.ilike.%${t}%,pn.ilike.%${t}%,description.ilike.%${t}%,stock_code.ilike.%${t}%,mnemonic.ilike.%${t}%,group_class.ilike.%${t}%`
+        `item_name.ilike.%${t}%,stock_code.ilike.%${t}%,merk.ilike.%${t}%,part_of.ilike.%${t}%`
       );
     });
     return query;
@@ -1248,22 +1027,16 @@ function buildSearchFilter(query, q){
 
   const term = terms[0];
   const isNumeric = /^\d+$/.test(term);
-  const isAlphaNum = /^[a-zA-Z0-9\-().]+$/.test(term) && !isNumeric;
 
   if(isNumeric){
-    // Angka murni: prioritas exact stock_code, lalu ilike
+    // Angka murni: prioritas exact stock_code (PN), lalu ilike
     return query.or(
-      `stock_code.eq.${term},stock_code.ilike.${term}%,pn.ilike.%${term}%,item_name.ilike.%${term}%,description.ilike.%${term}%`
-    );
-  } else if(isAlphaNum){
-    // Kode part (mix huruf+angka): prioritas pn & stock_code (starts-with), lalu ilike semua
-    return query.or(
-      `pn.ilike.${term}%,stock_code.ilike.${term}%,mnemonic.ilike.${term}%,pn.ilike.%${term}%,item_name.ilike.%${term}%,description.ilike.%${term}%,group_class.ilike.%${term}%`
+      `stock_code.eq.${term},stock_code.ilike.${term}%,item_name.ilike.%${term}%`
     );
   } else {
-    // Kata biasa: ilike semua kolom teks
+    // Kata biasa / kode part: ilike semua kolom relevan
     return query.or(
-      `item_name.ilike.%${term}%,pn.ilike.%${term}%,description.ilike.%${term}%,stock_code.ilike.%${term}%,mnemonic.ilike.%${term}%,group_class.ilike.%${term}%`
+      `item_name.ilike.%${term}%,stock_code.ilike.${term}%,stock_code.ilike.%${term}%,merk.ilike.%${term}%,part_of.ilike.%${term}%`
     );
   }
 }
@@ -1271,21 +1044,17 @@ function buildSearchFilter(query, q){
 function buildKatalogQuery(){
   const q=document.getElementById('searchInput').value.trim();
   const wh=document.getElementById('filterWarehouse').value;
-  const cl=document.getElementById('filterClass').value;
-  const mn=document.getElementById('filterMnemonic').value;
   let query=sb.from('items').select('*',{count:'exact'});
   query = buildSearchFilter(query, q);
   if(wh) query=query.eq('warehouse',wh);
-  if(cl) query=query.eq('class',cl);
-  if(mn) query=query.eq('mnemonic',mn);
   query=query.order(sortCol,{ascending:sortAsc});
   return query;
 }
 async function fetchKatalogPage(){
-  document.getElementById('catTableBody').innerHTML='<tr class="loading-row"><td colspan="10"><span class="spinner"></span> Memuat...</td></tr>';
+  document.getElementById('catTableBody').innerHTML='<tr class="loading-row"><td colspan="8"><span class="spinner"></span> Memuat...</td></tr>';
   const from=(currentPage-1)*PAGE_SIZE, to=from+PAGE_SIZE-1;
   const { data, count, error }=await buildKatalogQuery().range(from,to);
-  if(error){ document.getElementById('catTableBody').innerHTML=`<tr class="loading-row"><td colspan="10" style="color:var(--red);">Error: ${esc(error.message)}</td></tr>`; return; }
+  if(error){ document.getElementById('catTableBody').innerHTML=`<tr class="loading-row"><td colspan="8" style="color:var(--red);">Error: ${esc(error.message)}</td></tr>`; return; }
   totalItems=count||0;
   // preload images for this page
   await preloadImages(data||[]);
@@ -1295,22 +1064,18 @@ async function fetchKatalogPage(){
 }
 function renderKatalogRows(rows){
   const tbody=document.getElementById('catTableBody');
-  if(!rows.length){ tbody.innerHTML='<tr class="loading-row"><td colspan="12">Tidak ada item.</td></tr>'; return; }
+  if(!rows.length){ tbody.innerHTML='<tr class="loading-row"><td colspan="8">Tidak ada item.</td></tr>'; return; }
   tbody.innerHTML=rows.map(r=>{
     const key=rowKey(r), imgUrl=imgCache.get(key);
-    const avail=r.available||0;
-    const value=(r.amount_own_stok||0)+(r.amount_consign||0);
     return `<tr data-key="${esc(key)}">
       <td>${imgUrl?`<img src="${esc(imgUrl)}" class="thumb-cell">`:`<div style="width:8px;height:8px;border-radius:50%;background:var(--line-soft);margin:auto;"></div>`}</td>
       <td class="mono">${esc(r.warehouse||'')}</td>
-      <td class="pn">${esc(r.pn||'')}</td>
       <td class="mono" style="color:var(--ink-dim);font-size:11.5px;">${esc(r.stock_code||'')}</td>
-      <td style="color:var(--ink-dim);font-size:12px;">${esc(r.mnemonic||'')}</td>
-      <td><span class="chip" style="background:${classColor(r.class||'')}22;color:${classColor(r.class||'')}">${esc(r.class||'-')}</span></td>
-      <td class="name">${esc(r.item_name||'')}<br><span style="color:var(--ink-faint);font-size:11px;">${esc((r.description||'').slice(0,70))}</span></td>
+      <td class="name">${esc(r.item_name||'')}</td>
+      <td class="num">${fmtNum(r.qty)}</td>
       <td>${esc(r.uoi||'')}</td>
-      <td class="num">${fmtNum(r.total_soh)}</td>
-      <td class="num" style="${avail<0?'color:var(--red);font-weight:600;':''}">${fmtNum(avail)}</td>
+      <td style="color:var(--ink-dim);font-size:12px;">${esc(r.merk||'')}</td>
+      <td style="color:var(--ink-dim);font-size:12px;">${esc(r.part_of||'')}</td>
     </tr>`;
   }).join('');
   tbody.querySelectorAll('tr[data-key]').forEach(tr=>tr.addEventListener('click',()=>openModal(tr.dataset.key)));
@@ -1328,29 +1093,24 @@ document.querySelectorAll('#page-katalog thead th[data-col]').forEach(th=>{
 });
 let searchDebounce;
 document.getElementById('searchInput').addEventListener('input',()=>{ clearTimeout(searchDebounce); searchDebounce=setTimeout(()=>{ currentPage=1; fetchKatalogPage(); },300); });
-['filterWarehouse','filterClass','filterMnemonic'].forEach(id=>document.getElementById(id).addEventListener('change',()=>{ currentPage=1; fetchKatalogPage(); }));
+['filterWarehouse'].forEach(id=>document.getElementById(id).addEventListener('change',()=>{ currentPage=1; fetchKatalogPage(); }));
 document.getElementById('resetFiltersBtn').addEventListener('click',()=>{
   document.getElementById('searchInput').value=''; document.getElementById('filterWarehouse').value='';
-  document.getElementById('filterClass').value=''; document.getElementById('filterMnemonic').value='';
   currentPage=1; fetchKatalogPage();
 });
 
 /* ---------- katalog visual (kartu) ---------- */
 let sortCol2='item_name', sortAsc2=true;
-const VISUAL_COLS = 'warehouse,pn,mnemonic,stock_code,class,item_name,uoi,total_soh,amount_own_stok,amount_consign';
+const VISUAL_COLS = 'warehouse,stock_code,item_name,uoi,qty,merk,part_of';
 
 function buildVisualQuery(){
   const q=document.getElementById('searchInput2').value.trim();
   const wh=document.getElementById('filterWarehouse2').value;
-  const cl=document.getElementById('filterClass2').value;
-  const mn=document.getElementById('filterMnemonic2').value;
   const onlyImg=document.getElementById('onlyWithImageChk').checked;
   // Pilih kolom spesifik — jauh lebih cepat dari select('*')
   let query=sb.from('items').select(VISUAL_COLS,{count:'exact'});
   query = buildSearchFilter(query, q);
   if(wh) query=query.eq('warehouse',wh);
-  if(cl) query=query.eq('class',cl);
-  if(mn) query=query.eq('mnemonic',mn);
   query=query.order(sortCol2,{ascending:sortAsc2});
   return { query, onlyImg };
 }
@@ -1377,16 +1137,12 @@ async function fetchVisualPage(){
       return;
     }
     const wh=document.getElementById('filterWarehouse2').value;
-    const cl=document.getElementById('filterClass2').value;
-    const mn=document.getElementById('filterMnemonic2').value;
     const q=document.getElementById('searchInput2').value.trim();
     let filteredQuery=sb.from('items').select(VISUAL_COLS,{count:'exact'})
       .in('stock_code',[...new Set(imgStockCodes)])
       .in('warehouse',[...new Set(imgWarehouses)]);
     filteredQuery = buildSearchFilter(filteredQuery, q);
-    if(cl) filteredQuery=filteredQuery.eq('class',cl);
     if(wh) filteredQuery=filteredQuery.eq('warehouse',wh);
-    if(mn) filteredQuery=filteredQuery.eq('mnemonic',mn);
     filteredQuery=filteredQuery.order(sortCol2,{ascending:sortAsc2});
     const from=(currentPage2-1)*PAGE2_SIZE, to=from+PAGE2_SIZE-1;
     const { data, count, error }=await filteredQuery.range(from,to);
@@ -1412,7 +1168,6 @@ function renderCardGrid(rows){
   grid.innerHTML=rows.map(r=>{
     const key=rowKey(r), imgUrl=imgCache.get(key);
     const initial=(r.item_name||'?').trim().charAt(0).toUpperCase();
-    const value=(r.amount_own_stok||0)+(r.amount_consign||0);
     return `<div class="prod-card" data-key="${esc(key)}">
       <div class="prod-img-wrap">
         ${imgUrl?`<img src="${esc(imgUrl)}" class="prod-img">`:`<div class="prod-img-ph">${esc(initial)}</div>`}
@@ -1423,21 +1178,20 @@ function renderCardGrid(rows){
         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:2px;">
           <div style="display:flex;align-items:center;gap:3px;">
             <span style="font-size:9px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.05em;">PN</span>
-            <div class="prod-pn">${esc(r.pn||'-')}</div>
+            <div class="prod-pn">${esc(r.stock_code||'-')}</div>
           </div>
           <span style="color:var(--ink-faint);font-size:10px;">·</span>
           <div style="display:flex;align-items:center;gap:3px;">
-            <span style="font-size:9px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.05em;">SC</span>
-            <div style="font-family:'JetBrains Mono';font-size:10.5px;color:var(--amber);opacity:.9;">${esc(r.stock_code||'-')}</div>
+            <span style="font-size:9px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.05em;">Merk</span>
+            <div style="font-family:'JetBrains Mono';font-size:10.5px;color:var(--amber);opacity:.9;">${esc(r.merk||'-')}</div>
           </div>
         </div>
         <div class="prod-meta">
           <span style="font-family:JetBrains Mono;font-size:10.5px;color:var(--ink-faint);">${esc(r.warehouse||'')} · ${esc(r.uoi||'')}</span>
-          <span class="chip" style="background:${classColor(r.class||'')}22;color:${classColor(r.class||'')};font-size:10px;">${esc(r.class||'-')}</span>
+          <span class="chip" style="background:#5A6A8C22;color:#5A6A8C;font-size:10px;">${esc(r.part_of||'-')}</span>
         </div>
         <div class="prod-foot">
-          <span class="soh">SOH <strong>${fmtNum(r.total_soh)}</strong></span>
-          <span class="soh">${fmtRupiah(value)}</span>
+          <span class="soh">Qty <strong>${fmtNum(r.qty)}</strong></span>
         </div>
       </div>
     </div>`;
@@ -1446,10 +1200,10 @@ function renderCardGrid(rows){
 }
 let searchDebounce2;
 document.getElementById('searchInput2').addEventListener('input',()=>{ clearTimeout(searchDebounce2); searchDebounce2=setTimeout(()=>{ currentPage2=1; fetchVisualPage(); },500); });
-['filterWarehouse2','filterClass2','filterMnemonic2','onlyWithImageChk'].forEach(id=>document.getElementById(id).addEventListener('change',()=>{ currentPage2=1; fetchVisualPage(); }));
+['filterWarehouse2','onlyWithImageChk'].forEach(id=>document.getElementById(id).addEventListener('change',()=>{ currentPage2=1; fetchVisualPage(); }));
 document.getElementById('resetFiltersBtn2').addEventListener('click',()=>{
   document.getElementById('searchInput2').value=''; document.getElementById('filterWarehouse2').value='';
-  document.getElementById('filterClass2').value=''; document.getElementById('filterMnemonic2').value=''; document.getElementById('onlyWithImageChk').checked=false;
+  document.getElementById('onlyWithImageChk').checked=false;
   currentPage2=1; fetchVisualPage();
 });
 
@@ -1488,270 +1242,6 @@ async function preloadImages(rows){
 
 /* ---------- dashboard MEGA ---------- */
 let megaChartValue, megaChartCount, acTrendChart;
-async function loadMegaDashboard(){
-  const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
-  const legendColor = isDark ? '#E2ECF8' : '#0A1628';
-  // reset loading state
-  ['megaKpiItems','megaKpiSOH','megaKpiOwn','megaKpiConsign','megaKpiTotalAmount'].forEach(id=>{
-    document.getElementById(id).innerHTML='<span class="spinner"></span>';
-  });
-  document.getElementById('megaDetailTbody').innerHTML='<tr><td colspan="8" style="text-align:center;padding:30px;"><span class="spinner"></span></td></tr>';
-
-  const { data, error } = await sb.rpc('get_mega_dashboard');
-  if(error || !data){ 
-    document.getElementById('megaDetailTbody').innerHTML=`<tr><td colspan="8" style="color:var(--red);text-align:center;padding:20px;">Error memuat data MEGA. Pastikan SQL 08_mega_dashboard.sql sudah dijalankan.</td></tr>`;
-    return;
-  }
-
-  // KPI
-  document.getElementById('megaKpiItems').textContent   = fmtNum(data.total_items);
-  document.getElementById('megaKpiSOH').textContent     = fmtNum(data.total_soh);
-  document.getElementById('megaKpiOwn').textContent     = fmtRupiah(data.total_own_value);
-  document.getElementById('megaKpiConsign').textContent = fmtRupiah(data.total_consign_value);
-  document.getElementById('megaKpiTotalAmount').textContent = fmtRupiah((data.total_own_value||0) + (data.total_consign_value||0));
-
-  const cs = (data.class_stats || []).sort((a,b)=>b.total_value-a.total_value);
-  const totalItems = cs.reduce((s,c)=>s+c.item_count,0);
-  const totalValue = cs.reduce((s,c)=>s+c.total_value,0);
-
-  // Bar chart — nilai per class
-  if(megaChartValue) megaChartValue.destroy();
-  megaChartValue = new Chart(document.getElementById('megaChartValue'),{
-    type:'bar',
-    data:{
-      labels: cs.map(c=>c.class||'?'),
-      datasets:[{ label:'Nilai', data:cs.map(c=>c.total_value), backgroundColor:cs.map(c=>classColor(c.class||'')), borderRadius:5 }]
-    },
-    options:{
-      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:ctx=>fmtRupiahFull(ctx.raw) } }},
-      scales:{ x:{ticks:{color:legendColor},grid:{color:isDark?'#1F2B45':'#E2E8F5'}}, y:{ticks:{color:legendColor,callback:v=>fmtRupiah(v)},grid:{color:isDark?'#1F2B45':'#E2E8F5'}} }
-    }
-  });
-
-  // Donut chart — jumlah item per class
-  if(megaChartCount) megaChartCount.destroy();
-  megaChartCount = new Chart(document.getElementById('megaChartCount'),{
-    type:'doughnut',
-    data:{
-      labels: cs.map(c=>c.class||'?'),
-      datasets:[{ data:cs.map(c=>c.item_count), backgroundColor:cs.map(c=>classColor(c.class||'')), borderWidth:0 }]
-    },
-    options:{ plugins:{ legend:{ position:'right', labels:{ color:legendColor, boxWidth:10, font:{size:11} } }}, cutout:'58%' }
-  });
-
-  // Detail table
-  document.getElementById('megaDetailTbody').innerHTML = cs.map(c=>`
-    <tr data-class="${esc(c.class||'')}" style="cursor:pointer;">
-      <td><span class="chip" style="background:${classColor(c.class||'')}22;color:${classColor(c.class||'')}">${esc(c.class||'?')}</span></td>
-      <td class="num">${fmtNum(c.item_count)}</td>
-      <td class="num">${totalItems?(c.item_count/totalItems*100).toFixed(1):0}%</td>
-      <td class="num">${fmtNum(c.total_soh)}</td>
-      <td class="num">${fmtRupiahFull(c.own_value)}</td>
-      <td class="num">${fmtRupiahFull(c.consign_value)}</td>
-      <td class="num" style="color:var(--amber);font-weight:600;">${fmtRupiahFull(c.total_value)}</td>
-      <td class="num">${totalValue?(c.total_value/totalValue*100).toFixed(1):0}%</td>
-    </tr>`).join('');
-
-  // klik baris → filter katalog ke MEGA + class tersebut
-  document.querySelectorAll('#megaDetailTbody tr[data-class]').forEach(tr=>{
-    tr.addEventListener('click',()=>{
-      document.querySelector('[data-page="katalog"]').click();
-      setTimeout(()=>{
-        document.getElementById('filterWarehouse').value='MEGA';
-        document.getElementById('filterClass').value=tr.dataset.class;
-        currentPage=1; fetchKatalogPage();
-      },80);
-    });
-  });
-
-  // Class A & C — Readiness
-  const { data: readiness } = await sb.rpc('get_ac_readiness_mega');
-  const rd = readiness || {};
-  const totalAC = rd.total_ac || 0;
-  document.getElementById('acReadTotal').textContent = fmtNum(totalAC);
-
-  // Ambil data SOH=0 untuk card pertama
-  const { data: acData } = await sb.rpc('get_ac_stock_habis_mega');
-  const { data: acStats } = await sb.rpc('get_ac_stats_mega');
-  const acList = acData || [];
-  const acTotalCount = acStats?.[0]?.total_count || acStats?.total_count || 0;
-  const acReadyCount = acStats?.[0]?.ready_count || acStats?.ready_count || 0;
-  const pctReady = acTotalCount ? (acReadyCount/acTotalCount*100).toFixed(1) : '0.0';
-
-  // Simpan data per kategori untuk popup
-  window._acCategoryData = {
-    soh_eq_0: acList,
-  };
-
-  const categories = [
-    { key:'soh_eq_0',   label:'SOH = 0',    desc:'Item stok habis',                      color:'var(--red)',   count: acList.length,    pct: acTotalCount?(acList.length/acTotalCount*100).toFixed(1):'0.0' },
-    { key:'soh_gt_0',   label:'SOH > 0',    desc:'Item dengan stok tersedia',            color:'var(--teal)',  count: rd.soh_gt_0||0,   pct: totalAC?((rd.soh_gt_0||0)/totalAC*100).toFixed(1):'0.0' },
-    { key:'soh_gt_min', label:'SOH > MIN',  desc:'Stok di atas level minimum',           color:'var(--green)', count: rd.soh_gt_min||0, pct: totalAC?((rd.soh_gt_min||0)/totalAC*100).toFixed(1):'0.0' },
-    { key:'fb_gt_0',    label:'FB > 0',     desc:'Free Balance positif (SOH+MIT+DI-DO)', color:'var(--amber)', count: rd.fb_gt_0||0,    pct: totalAC?((rd.fb_gt_0||0)/totalAC*100).toFixed(1):'0.0' },
-    { key:'fb_gt_min',  label:'FB > MIN',   desc:'Free Balance di atas level minimum',   color:'#9D7CF2',      count: rd.fb_gt_rop||0,  pct: totalAC?((rd.fb_gt_rop||0)/totalAC*100).toFixed(1):'0.0' },
-    { key:'rop_lte_fb', label:'ROP ≥ FB',   desc:'ROP sudah melewati Free Balance',      color:'#F87171',      count: rd.rop_lte_fb||0, pct: totalAC?((rd.rop_lte_fb||0)/totalAC*100).toFixed(1):'0.0' },
-  ];
-
-  window._acReadinessCategories = categories;
-  window._acReadinessMeta = { total: totalAC, date: new Date() };
-
-  document.getElementById('megaLowStockBox').innerHTML = `
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
-      <span class="chip" style="background:${classColor('A')}22;color:${classColor('A')};font-size:10px;">A: ${acList.filter(r=>r.class==='A').length} habis</span>
-      <span class="chip" style="background:${classColor('C')}22;color:${classColor('C')};font-size:10px;">C: ${acList.filter(r=>r.class==='C').length} habis</span>
-      <span style="font-size:10px;color:var(--ink-faint);align-self:center;">dari ${fmtNum(acTotalCount)} item Class A & C MEGA</span>
-    </div>
-  `;
-
-  document.getElementById('acReadinessBox').innerHTML = `
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;">
-      ${categories.map(c=>`
-        <div onclick="showReadinessDetail('${c.key}')" style="background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px;position:relative;overflow:hidden;cursor:pointer;transition:border-color .2s,box-shadow .2s;" onmouseover="this.style.borderColor='${c.color}';this.style.boxShadow='0 0 16px ${c.color}22'" onmouseout="this.style.borderColor='var(--line)';this.style.boxShadow='none'">
-          <div style="position:absolute;top:0;left:0;right:0;height:2px;background:${c.color};"></div>
-          <div style="font-size:13px;font-weight:700;color:${c.color};margin-bottom:2px;">${c.label}</div>
-          <div style="font-size:11px;color:var(--ink-faint);margin-bottom:10px;">${c.desc}</div>
-          <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:8px;">
-            <span style="font-size:22px;font-weight:700;color:var(--ink);">${fmtNum(c.count)}</span>
-            <span style="font-size:13px;font-weight:600;color:${c.color};">${c.pct}%</span>
-          </div>
-          <div class="bar-track" style="height:5px;">
-            <div style="height:100%;width:${c.pct}%;background:${c.color};border-radius:4px;transition:width .5s;"></div>
-          </div>
-          <div style="font-size:10px;color:${c.color};margin-top:8px;opacity:.7;">Klik untuk lihat detail →</div>
-        </div>`).join('')}
-    </div>
-
-    <!-- POPUP DETAIL -->
-    <div id="readinessDetailPopup" style="display:none;margin-top:16px;border:1px solid var(--line);border-radius:10px;overflow:hidden;">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg-panel);border-bottom:1px solid var(--line);">
-        <span id="readinessDetailTitle" style="font-size:13px;font-weight:600;color:var(--ink);"></span>
-        <button onclick="document.getElementById('readinessDetailPopup').style.display='none'" style="background:none;border:none;color:var(--ink-faint);font-size:16px;cursor:pointer;">✕</button>
-      </div>
-      <div id="readinessDetailList" style="max-height:320px;overflow-y:auto;"></div>
-    </div>
-  `;
-
-  // Trend Nilai Inventory Class A & C
-  const { data: trendData } = await sb.rpc('get_ac_trend', { days_back: 30 });
-  const trend = trendData || [];
-
-  if(trend.length < 2){
-    document.getElementById('acTrendEmpty').style.display = 'block';
-    document.getElementById('acTrendChartWrap').style.display = 'none';
-  } else {
-    document.getElementById('acTrendEmpty').style.display = 'none';
-    document.getElementById('acTrendChartWrap').style.display = 'block';
-  }
-
-  if(acTrendChart) acTrendChart.destroy();
-  if(trend.length > 0){
-    acTrendChart = new Chart(document.getElementById('acTrendChart'), {
-      type: 'line',
-      data: {
-        labels: trend.map(t => new Date(t.snapshot_date).toLocaleDateString('id-ID', {day:'2-digit', month:'short'})),
-        datasets: [
-          {
-            label: 'Total Nilai (A+C)',
-            data: trend.map(t => t.total_amount),
-            borderColor: '#00D4FF',
-            backgroundColor: '#00D4FF15',
-            fill: true,
-            tension: 0.35,
-            pointRadius: 3,
-            pointBackgroundColor: '#00D4FF',
-          },
-          {
-            label: 'Class A',
-            data: trend.map(t => t.class_a_amount),
-            borderColor: classColor('A'),
-            backgroundColor: 'transparent',
-            fill: false,
-            tension: 0.35,
-            pointRadius: 2,
-            borderDash: [4,3],
-          },
-          {
-            label: 'Class C',
-            data: trend.map(t => t.class_c_amount),
-            borderColor: classColor('C'),
-            backgroundColor: 'transparent',
-            fill: false,
-            tension: 0.35,
-            pointRadius: 2,
-            borderDash: [4,3],
-          },
-        ]
-      },
-      options: {
-        plugins: {
-          legend: { position:'top', labels:{ color: legendColor, boxWidth:12, font:{size:11} } },
-          tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${fmtRupiahFull(ctx.raw)}` } }
-        },
-        scales: {
-          x: { ticks:{ color: legendColor, font:{size:10} }, grid:{ color: isDark?'#1F2B45':'#E2E8F5' } },
-          y: { ticks:{ color: legendColor, callback: v=>fmtRupiah(v), font:{size:10} }, grid:{ color: isDark?'#1F2B45':'#E2E8F5' } }
-        }
-      }
-    });
-  }
-}
-
-/* ── READINESS DETAIL POPUP ── */
-async function showReadinessDetail(key){
-  const popup = document.getElementById('readinessDetailPopup');
-  const title = document.getElementById('readinessDetailTitle');
-  const list  = document.getElementById('readinessDetailList');
-
-  const labels = {
-    soh_eq_0:  'SOH = 0 — Item Stok Habis',
-    soh_gt_0:  'SOH > 0 — Item Stok Tersedia',
-    soh_gt_min:'SOH > MIN — Stok di Atas Minimum',
-    fb_gt_0:   'FB > 0 — Free Balance Positif',
-    fb_gt_min: 'FB > MIN — Free Balance di Atas Minimum',
-    rop_lte_fb:'ROP ≥ FB — ROP Melewati Free Balance',
-  };
-
-  title.textContent = labels[key] || key;
-  list.innerHTML = '<div style="padding:16px;text-align:center;"><span class="spinner"></span></div>';
-  popup.style.display = 'block';
-  popup.scrollIntoView({behavior:'smooth', block:'nearest'});
-
-  let rows = [];
-  if(key === 'soh_eq_0'){
-    rows = window._acCategoryData?.soh_eq_0 || [];
-  } else {
-    // Query langsung dari DB
-    const queryMap = {
-      soh_gt_0:   ()=> sb.from('items').select('item_name,stock_code,class,total_soh').eq('warehouse','MEGA').in('class',['A','C']).gt('total_soh',0).order('item_name').limit(200),
-      soh_gt_min: ()=> sb.rpc('get_ac_detail_mega', {rule_key:'soh_gt_min'}),
-      fb_gt_0:    ()=> sb.rpc('get_ac_detail_mega', {rule_key:'fb_gt_0'}),
-      fb_gt_min:  ()=> sb.rpc('get_ac_detail_mega', {rule_key:'fb_gt_min'}),
-      rop_lte_fb: ()=> sb.rpc('get_ac_detail_mega', {rule_key:'rop_lte_fb'}),
-    };
-    const fn = queryMap[key];
-    if(fn){
-      const { data } = await fn();
-      rows = data || [];
-    }
-  }
-
-  if(!rows.length){
-    list.innerHTML = '<div style="padding:14px;color:var(--ink-faint);font-size:12px;">Tidak ada item.</div>';
-    return;
-  }
-
-  list.innerHTML = rows.map((r,i)=>`
-    <div onclick="openModal('MEGA|${r.stock_code}')" style="display:grid;grid-template-columns:1fr 52px 70px;padding:8px 14px;border-bottom:1px solid var(--line-soft);align-items:center;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bg-panel)'" onmouseout="this.style.background='transparent'">
-      <div>
-        <div style="font-size:12px;color:var(--ink);font-weight:500;">${esc((r.item_name||'').slice(0,36))}</div>
-        <div class="mono" style="color:var(--ink-faint);font-size:10px;">${esc(r.stock_code||'')}</div>
-      </div>
-      <div style="text-align:center;">
-        <span class="chip" style="background:${classColor(r.class||'')}22;color:${classColor(r.class||'')};font-size:9px;">${esc(r.class||'')}</span>
-      </div>
-      <div style="text-align:right;font-family:var(--mono);font-size:11px;color:var(--ink-dim);">${fmtNum(r.total_soh??r.soh??0)}</div>
-    </div>`).join('');
-}
 
 /* ---------- modal ---------- */
 async function openModal(key){
@@ -1760,17 +1250,11 @@ async function openModal(key){
   const { data }=await sb.from('items').select('*').eq('warehouse',warehouse).eq('stock_code',stockCode).maybeSingle();
   if(!data) return;
   document.getElementById('modalItemName').textContent=data.item_name||'(tanpa nama)';
-  document.getElementById('modalItemMeta').textContent=`${data.pn||''} · ${data.warehouse||''} · Stock Code ${data.stock_code||''}`;
+  document.getElementById('modalItemMeta').textContent=`PN ${data.stock_code||''} · ${data.warehouse||''}`;
   const fields=[
-    ['Warehouse',data.warehouse],['Mnemonic',data.mnemonic||'-'],
-    ['Class',data.class||'-'],['UOI',data.uoi||'-'],
-    ['Bin Location',data.bin_loc||'-'],['Expense Element',data.expense_element||'-'],
-    ['MIT',data.mit||'-'],['Dues In',data.dues_in||'-'],
-    ['Owned SOH',fmtNum(data.owned_soh)],['Consign SOH',fmtNum(data.cons_soh)],
-    ['Total SOH',fmtNum(data.total_soh)],['Available',fmtNum(data.available)],
-    ['Issue Price',fmtRupiahFull(data.issue_price)],
-    ['Nilai Stock',fmtRupiahFull((data.amount_own_stok||0)+(data.amount_consign||0))],
-    ['Deskripsi',data.description||'-']
+    ['Warehouse',data.warehouse],['PN',data.stock_code||'-'],
+    ['Qty',fmtNum(data.qty)],['Satuan',data.uoi||'-'],
+    ['Merk',data.merk||'-'],['Part of',data.part_of||'-']
   ];
   document.getElementById('modalDetailGrid').innerHTML=fields.map(([l,v])=>`<div class="detail-item"><div class="lbl">${l}</div><div class="v">${esc(v)}</div></div>`).join('');
   await refreshModalImg(key);
@@ -1787,7 +1271,7 @@ async function loadStockHistory(warehouse, stockCode){
   const { data, error } = await sb.rpc('get_stock_history', { p_warehouse: warehouse, p_stock_code: stockCode, p_limit: 30 });
 
   // Ambil hanya perubahan total_soh, urutkan kronologis (lama → baru)
-  const totalSohRows = (data||[]).filter(h=>h.field_name==='total_soh').slice().reverse();
+  const totalSohRows = (data||[]).filter(h=>h.field_name==='qty').slice().reverse();
 
   if(error || totalSohRows.length===0){
     list.innerHTML = '<div style="padding:14px;color:var(--ink-faint);text-align:center;">Belum ada riwayat perubahan untuk item ini.</div>';
@@ -1826,12 +1310,12 @@ async function loadStockHistory(warehouse, stockCode){
 
   list.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-      <span style="font-size:11px;color:var(--ink-faint);">Total SOH — ${totalSohRows.length} perubahan tercatat</span>
+      <span style="font-size:11px;color:var(--ink-faint);">Qty — ${totalSohRows.length} perubahan tercatat</span>
       ${isHabis ? '<span style="font-size:10.5px;color:var(--red);background:var(--red-soft);padding:3px 10px;border-radius:6px;">⚠ Stok habis</span>' : ''}
     </div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;">
       <div style="background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;">
-        <div style="font-size:10px;color:var(--ink-faint);">SOH saat ini</div>
+        <div style="font-size:10px;color:var(--ink-faint);">Qty saat ini</div>
         <div style="font-size:18px;font-weight:700;color:var(--ink);margin-top:3px;">${fmtNum(current)}</div>
       </div>
       <div style="background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;">
@@ -1844,7 +1328,7 @@ async function loadStockHistory(warehouse, stockCode){
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:8px;font-size:10.5px;color:var(--ink-faint);">
-      <span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:#00D4FF;"></span>Total SOH</span>
+      <span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:#00D4FF;"></span>Qty</span>
       <span style="display:flex;align-items:center;gap:4px;"><span style="width:7px;height:7px;border-radius:50%;background:#FF4D6A;"></span>Penurunan signifikan</span>
     </div>
     <div style="position:relative;width:100%;height:200px;">
@@ -1886,7 +1370,7 @@ async function loadStockHistory(warehouse, stockCode){
           borderColor: '#00D4FF40', borderWidth: 1,
           titleColor: legendColor, bodyColor: legendColor,
           padding: 10, cornerRadius: 8,
-          callbacks: { label: c => ' Total SOH: ' + fmtNum(c.raw) }
+          callbacks: { label: c => ' Qty: ' + fmtNum(c.raw) }
         }
       },
       scales: {
@@ -2107,13 +1591,9 @@ async function loadGallery(page=1){
 
 /* ---------- excel upload ---------- */
 const EXCEL_TO_DB={
-  'WAREHOUSE':'warehouse','PN':'pn','MNEMONIC':'mnemonic','STOCK CODE':'stock_code','CLASS':'class',
-  'ITEM NAME':'item_name','DESCRIPTION':'description','GROUP CLASS':'group_class','UOI':'uoi',
-  'OWNED SOH':'owned_soh','BIN LOC':'bin_loc','CONS SOH':'cons_soh','TOTAL SOH':'total_soh',
-  'AVAILABLE':'available','ISSUE PRICE':'issue_price','AMOUNT OWN STOK':'amount_own_stok','AMOUNT CONSIGN':'amount_consign',
-  'EXPENSE ELEMENT':'expense_element','MIT':'mit','DUES IN':'dues_in','DUES OUT':'dues_out'
+  'NAMA PART':'item_name','PN':'stock_code','QTY':'qty','SATUAN':'uoi','MERK':'merk','PART OF':'part_of'
 };
-const NUM_COLS=new Set(['owned_soh','cons_soh','total_soh','available','issue_price','amount_own_stok','amount_consign','mit','dues_in','dues_out']);
+const NUM_COLS=new Set(['qty']);
 
 function logUp(msg,cls){
   const box=document.getElementById('uploadLog');
@@ -2128,61 +1608,12 @@ dropzone.addEventListener('click',()=>{ if(!isEditor){ showPinModal(); return; }
 ['dragleave','drop'].forEach(ev=>dropzone.addEventListener(ev,e=>{ e.preventDefault(); dropzone.classList.remove('drag'); }));
 dropzone.addEventListener('drop',e=>{ if(!isEditor){ showPinModal(); return; } if(e.dataTransfer.files[0]) handleExcel(e.dataTransfer.files[0]); });
 fileInput.addEventListener('change',e=>{ if(e.target.files[0]) handleExcel(e.target.files[0]); });
-
-// ===== EXPORT & SNAPSHOT READINESS MEGA (TIMEFRAME) =====
-function exportReadinessExcel(){
-  const cats = window._acReadinessCategories;
-  const meta = window._acReadinessMeta;
-  if(!cats){ alert('Data readiness belum siap. Buka halaman Dashboard MEGA terlebih dahulu.'); return; }
-  const tanggal = meta.date.toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit',year:'numeric'});
-  const jam = meta.date.toLocaleTimeString('id-ID');
-  const rows = cats.map(c=>({
-    'Timeframe (Tanggal)': tanggal,
-    'Jam Export': jam,
-    'Kategori': c.label,
-    'Keterangan': c.desc,
-    'Jumlah Item': c.count,
-    'Persentase (%)': c.pct,
-    'Total Item Class A & C': meta.total
-  }));
-  const ws = XLSX.utils.json_to_sheet(rows);
-  ws['!cols'] = [{wch:16},{wch:12},{wch:12},{wch:32},{wch:14},{wch:14},{wch:20}];
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Readiness MEGA');
-  const fname = `readiness_mega_${meta.date.toISOString().slice(0,10)}.xlsx`;
-  XLSX.writeFile(wb, fname);
-}
-
-async function saveReadinessSnapshotMega(){
-  try{
-    const { data: readiness } = await sb.rpc('get_ac_readiness_mega');
-    const rd = readiness || {};
-    const totalAC = rd.total_ac || 0;
-    const { data: acData }  = await sb.rpc('get_ac_stock_habis_mega');
-    const acList = acData || [];
-    const soh0 = acList.length;
-    const pct = (n)=> totalAC ? Number((n/totalAC*100).toFixed(1)) : 0;
-
-    await sb.rpc('save_readiness_snapshot_mega', {
-      p_total_item:      totalAC,
-      p_soh0_count:       soh0,               p_soh0_pct:       pct(soh0),
-      p_sohgt0_count:     rd.soh_gt_0||0,     p_sohgt0_pct:     pct(rd.soh_gt_0||0),
-      p_sohgtmin_count:   rd.soh_gt_min||0,   p_sohgtmin_pct:   pct(rd.soh_gt_min||0),
-      p_fbgt0_count:      rd.fb_gt_0||0,      p_fbgt0_pct:      pct(rd.fb_gt_0||0),
-      p_fbgtmin_count:    rd.fb_gt_rop||0,    p_fbgtmin_pct:    pct(rd.fb_gt_rop||0),
-      p_ropgtefb_count:   rd.rop_lte_fb||0,   p_ropgtefb_pct:   pct(rd.rop_lte_fb||0),
-      p_class_a_habis:    acList.filter(r=>r.class==='A').length,
-      p_class_c_habis:    acList.filter(r=>r.class==='C').length
-    });
-  }catch(e){
-    console.warn('Snapshot readiness belum tersimpan (function SQL mungkin belum dibuat di Supabase):', e.message);
-  }
-}
-
 async function handleExcel(file){
   if(!isEditor){ showPinModal(); return; }
   document.getElementById('uploadLog').innerHTML='';
-  logUp(`Membaca "${file.name}"...`);
+  const warehouseVal=(document.getElementById('uploadWarehouseInput').value||'').trim();
+  if(!warehouseVal){ logUp('Isi dulu nama Warehouse untuk file ini sebelum upload.','err'); return; }
+  logUp(`Membaca "${file.name}" untuk warehouse "${warehouseVal}"...`);
   const reader=new FileReader();
   reader.onload=async e=>{
     try{
@@ -2192,7 +1623,7 @@ async function handleExcel(file){
       if(!json.length){ logUp('File kosong.','err'); return; }
       const sampleKeys=Object.keys(json[0]).map(k=>k.toString().trim().toUpperCase());
       const missing=Object.keys(EXCEL_TO_DB).filter(req=>!sampleKeys.includes(req));
-      if(missing.length>10){ logUp('Header tidak cocok. Kolom hilang: '+missing.slice(0,6).join(', ')+'...','err'); return; }
+      if(missing.length>4){ logUp('Header tidak cocok. Kolom hilang: '+missing.join(', '),'err'); return; }
       if(missing.length) logUp('Peringatan: kolom hilang: '+missing.join(', '),'warn');
 
       const rows=json.map(obj=>{
@@ -2203,6 +1634,7 @@ async function handleExcel(file){
           let v=norm[exk]!==undefined?norm[exk]:'';
           row[dbk]=NUM_COLS.has(dbk)?parseFloat(v)||0:(v===null||v===undefined?'':v.toString().trim());
         });
+        row.warehouse=warehouseVal;
         return row;
       }).filter(r=>r.warehouse&&r.stock_code);
       logUp(`${fmtNum(rows.length)} baris valid disiapkan.`);
@@ -2211,8 +1643,8 @@ async function handleExcel(file){
       const CHUNK=500;
       let done=0;
       if(mode==='replace'){
-        logUp('Menghapus data lama...','warn');
-        const { error:delErr }=await sb.from('items').delete().neq('id',0);
+        logUp(`Menghapus data lama warehouse "${warehouseVal}"...`,'warn');
+        const { error:delErr }=await sb.from('items').delete().eq('warehouse',warehouseVal);
         if(delErr) throw delErr;
         logUp('Data lama dihapus. Mengisi ulang...');
       }
@@ -2225,15 +1657,12 @@ async function handleExcel(file){
       }
       logUp(`Selesai! ${fmtNum(done)} baris berhasil disimpan ke database.`,'ok');
       const now=new Date().toLocaleTimeString('id-ID');
-      uploadHistory.push(`${now} — ${file.name} (${mode}, ${fmtNum(done)} baris)`);
+      uploadHistory.push(`${now} — ${file.name} (${mode}, ${warehouseVal}, ${fmtNum(done)} baris)`);
       document.getElementById('uploadHistory').innerHTML=uploadHistory.map(s=>`<div style="padding:4px 0;border-bottom:1px solid var(--line-soft);">${s}</div>`).join('');
       // refresh
       await loadFilterOptions();
       await loadDashboard();
       logUp('Dashboard dan katalog telah diperbarui.','ok');
-      // simpan snapshot Readiness MEGA untuk timeframe hari ini
-      await saveReadinessSnapshotMega();
-      logUp('Snapshot Readiness MEGA (timeframe hari ini) tersimpan.','ok');
     }catch(err){ logUp('Error: '+err.message,'err'); }
   };
   reader.readAsArrayBuffer(file);
@@ -2523,33 +1952,29 @@ document.getElementById('exportPdfBtn').addEventListener('click', async () => {
     // Tabel
     const rows = (data || []).map(r => [
       r.warehouse || '-',
-      r.pn || '-',
       r.stock_code || '-',
-      r.mnemonic || '-',
-      r.class || '-',
       r.item_name || '-',
+      r.qty != null ? r.qty : '-',
       r.uoi || '-',
-      r.total_soh != null ? r.total_soh : '-',
-      r.available != null ? r.available : '-',
+      r.merk || '-',
+      r.part_of || '-',
     ]);
 
     doc.autoTable({
       startY: 32,
-      head: [['Gudang','Part Number','Stock Code','Mnemonic','Class','Item / Deskripsi','UOI','Total SOH','Available']],
+      head: [['Gudang','PN','Nama Part','Qty','Satuan','Merk','Part of']],
       body: rows,
       styles: { fontSize: 7.5, cellPadding: 2.5, textColor: [232,236,246], fillColor: [17,26,46] },
       headStyles: { fillColor: [242,163,60], textColor: [26,18,8], fontStyle: 'bold', fontSize: 8 },
       alternateRowStyles: { fillColor: [14,22,38] },
       columnStyles: {
-        0: { cellWidth: 22 },
-        1: { cellWidth: 28 },
-        2: { cellWidth: 24 },
-        3: { cellWidth: 22 },
-        4: { cellWidth: 18 },
-        5: { cellWidth: 'auto' },
-        6: { cellWidth: 14 },
-        7: { cellWidth: 20, halign: 'right' },
-        8: { cellWidth: 20, halign: 'right' },
+        0: { cellWidth: 26 },
+        1: { cellWidth: 30 },
+        2: { cellWidth: 'auto' },
+        3: { cellWidth: 20, halign: 'right' },
+        4: { cellWidth: 20 },
+        5: { cellWidth: 26 },
+        6: { cellWidth: 26 },
       },
       margin: { left: 14, right: 14 },
       didDrawPage: (d) => {
