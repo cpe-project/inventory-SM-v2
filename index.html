@@ -137,6 +137,13 @@ table.data-mini td.num,table.data-mini th.num{text-align:right;font-family:'JetB
 .btn.ghost:hover{border-color:var(--amber);color:var(--amber);}
 .btn.small{padding:5px 10px;font-size:11.5px;}
 .result-count{font-size:11.5px;color:var(--ink-faint);font-family:'JetBrains Mono';white-space:nowrap;}
+.export-dropdown{position:relative;margin-left:auto;}
+#exportMenuBtn{font-size:11px;padding:5px 10px;}
+.export-menu{position:absolute;top:calc(100% + 6px);right:0;background:var(--bg-panel);border:1px solid var(--line);border-radius:9px;box-shadow:0 10px 28px #00000055;min-width:170px;overflow:hidden;z-index:30;display:none;}
+.export-menu.open{display:block;}
+.export-menu button{width:100%;background:none;border:none;text-align:left;padding:9px 13px;font-size:12.5px;color:var(--ink);display:flex;align-items:center;gap:8px;}
+.export-menu button:hover{background:var(--teal-soft);color:var(--teal);}
+.export-menu button svg{width:14px;height:14px;flex:none;}
 .mode-toggle{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px;}
 .mode-opt{padding:7px 15px;border-radius:8px;font-size:12.5px;font-weight:600;color:var(--ink-dim);cursor:pointer;transition:background .15s,color .15s;user-select:none;}
 .mode-opt.active{background:var(--teal);color:#F5F9FF;}
@@ -344,8 +351,6 @@ table.cat-table td.pn{font-family:'JetBrains Mono';color:var(--teal);}
   /* Result count */
   .result-count{font-size:10px;}
 
-  /* Export PDF tombol */
-  #exportPdfBtn{font-size:11px;padding:5px 8px;}
 }
 </style>
 </head>
@@ -464,7 +469,17 @@ table.cat-table td.pn{font-family:'JetBrains Mono';color:var(--teal);}
         <input type="text" id="searchInput" placeholder="Cari nama item, PN, merk, part of...">
         <select id="filterKlas"><option value="">Semua Klasifikasi</option></select>
         <button class="btn ghost small" id="resetFiltersBtn">Reset</button>
-        <button class="btn small" id="exportPdfBtn" style="margin-left:auto;background:var(--teal);color:#F5F9FF;display:flex;align-items:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Export PDF</button>
+        <div class="export-dropdown">
+          <button class="btn small" id="exportMenuBtn" style="background:var(--teal);color:#F5F9FF;display:flex;align-items:center;gap:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="margin-left:1px;"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="export-menu" id="exportMenu">
+            <button type="button" id="exportPdfBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Export PDF</button>
+            <button type="button" id="exportExcelBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9.5" y1="13" x2="14.5" y2="18"/><line x1="14.5" y1="13" x2="9.5" y2="18"/></svg> Export Excel</button>
+          </div>
+        </div>
         <span class="result-count" id="resultCount"></span>
       </div>
       <div class="table-scroll">
@@ -1830,7 +1845,54 @@ document.getElementById('exportPdfBtn').addEventListener('click', async () => {
   }
 
   btn.disabled = false;
-  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Export PDF';
+  btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Export PDF';
+  document.getElementById('exportMenu').classList.remove('open');
+});
+
+/* export dropdown open/close */
+document.getElementById('exportMenuBtn').addEventListener('click', (e)=>{
+  e.stopPropagation();
+  document.getElementById('exportMenu').classList.toggle('open');
+});
+document.addEventListener('click', (e)=>{
+  const menu=document.getElementById('exportMenu');
+  if(menu.classList.contains('open') && !menu.contains(e.target) && e.target.id!=='exportMenuBtn'){
+    menu.classList.remove('open');
+  }
+});
+
+/* export Excel — pakai filter aktif yang sama seperti Export PDF */
+document.getElementById('exportExcelBtn').addEventListener('click', async () => {
+  const btn = document.getElementById('exportExcelBtn');
+  const originalHTML = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner" style="width:12px;height:12px;"></span> Menyiapkan...';
+  try {
+    const query = buildKatalogQuery();
+    const { data, error } = await query;
+    if (error) throw error;
+
+    const rows = (data || []).map(r => ({
+      'PN': r.stock_code || '',
+      'Nama Part': r.item_name || '',
+      'Qty': r.qty != null ? r.qty : 0,
+      'Satuan': r.uoi || '',
+      'Merk': r.merk || '',
+      'Part of': r.part_of || '',
+      'Klasifikasi': r.klasifikasi || '',
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = [{wch:16},{wch:34},{wch:8},{wch:10},{wch:16},{wch:14},{wch:14}];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Katalog');
+    XLSX.writeFile(wb, `Katalog-SM-Mining-${new Date().toISOString().slice(0,10)}.xlsx`);
+  } catch(e) {
+    alert('Gagal export Excel: ' + e.message);
+  }
+  btn.disabled = false;
+  btn.innerHTML = originalHTML;
+  document.getElementById('exportMenu').classList.remove('open');
 });
 
 /* ── TOGGLE PANEL ── */
