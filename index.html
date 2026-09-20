@@ -12,26 +12,28 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
 :root{
-  /* DARK MODE (default) — Futuristik */
-  --bg:#080C18;--bg-panel:#0D1424;--bg-panel-2:#0A1020;
-  --line:#1A2640;--line-soft:#111D33;
-  --ink:#E2ECF8;--ink-dim:#7A90B8;--ink-faint:#445878;
-  --amber:#F2A33C;--amber-soft:#F2A33C18;
-  --teal:#00D4FF;--teal-soft:#00D4FF15;
-  --red:#FF4D6A;--red-soft:#FF4D6A18;
-  --green:#00FF9C;--green-soft:#00FF9C15;
-  --radius:10px;
-  --accent-glow:0 0 18px #00D4FF22;
+  /* DARK MODE (default) — Navy Profesional */
+  --bg:#0A1220;--bg-panel:#111C30;--bg-panel-2:#0C1728;
+  --line:#1E2C46;--line-soft:#16223A;
+  --ink:#E7ECF7;--ink-dim:#8B9AC2;--ink-faint:#5A6B8C;
+  --amber:#F5A623;--amber-soft:#F5A62318;
+  --teal:#3B82F6;--teal-soft:#3B82F618;
+  --red:#FB4B62;--red-soft:#FB4B6218;
+  --green:#14B8A6;--green-soft:#14B8A618;
+  --purple:#A855F7;--purple-soft:#A855F718;
+  --radius:12px;
+  --accent-glow:0 0 18px #3B82F626;
 }
 [data-theme="light"]{
-  --bg:#F0F4FF;--bg-panel:#FFFFFF;--bg-panel-2:#F8FAFF;
-  --line:#CBD5E8;--line-soft:#E2E8F5;
-  --ink:#0A1628;--ink-dim:#4A5C7A;--ink-faint:#8A9BB8;
-  --amber:#C97A1E;--amber-soft:#C97A1E18;
-  --teal:#0066CC;--teal-soft:#0066CC12;
-  --red:#CC2244;--red-soft:#CC224418;
-  --green:#16A34A;--green-soft:#16A34A12;
-  --accent-glow:0 0 12px #0066CC18;
+  --bg:#F2F5FB;--bg-panel:#FFFFFF;--bg-panel-2:#F7FAFF;
+  --line:#D9E1F0;--line-soft:#E8EEF8;
+  --ink:#101B2E;--ink-dim:#51617D;--ink-faint:#8CA0BE;
+  --amber:#C9720F;--amber-soft:#C9720F16;
+  --teal:#2563EB;--teal-soft:#2563EB12;
+  --red:#DC2626;--red-soft:#DC262614;
+  --green:#0D9488;--green-soft:#0D948814;
+  --purple:#9333EA;--purple-soft:#9333EA14;
+  --accent-glow:0 0 12px #2563EB1c;
 }
 *{box-sizing:border-box;}html,body{margin:0;padding:0;}
 body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;font-size:14px;-webkit-font-smoothing:antialiased;transition:background .3s,color .3s;}
@@ -90,19 +92,21 @@ nav.tabs{display:flex;flex-direction:column;gap:2px;margin-top:4px;}
 @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;}}
 
 /* KPI + PANELS */
-.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap;}
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap;padding:22px 26px;border-radius:16px;border:1px solid var(--line);background:radial-gradient(140% 200% at 100% -30%,var(--teal-soft) 0%,transparent 55%),radial-gradient(110% 160% at -10% 130%,var(--amber-soft) 0%,transparent 50%),var(--bg-panel);}
 .page-head h1{font-size:22px;margin:0 0 4px;}
 .page-head p{margin:0;color:var(--ink-dim);font-size:13px;}
 .eyebrow{font-size:10.5px;color:var(--teal);text-transform:uppercase;letter-spacing:.14em;font-weight:600;margin-bottom:6px;}
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px;}
 .kpi-grid.kpi-grid-5{grid-template-columns:repeat(5,1fr);}
 .kpi-grid.kpi-grid-3{grid-template-columns:repeat(3,1fr);}
-.kpi-card{background:var(--bg-panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;position:relative;overflow:hidden;transition:border-color .2s,box-shadow .2s;}
-.kpi-card:hover{border-color:var(--accent,var(--amber));box-shadow:0 0 20px var(--accent,var(--amber))18;}
-.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent,var(--amber));}
-.kpi-label{font-size:12px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;font-weight:600;}
-.kpi-value{font-family:'Space Grotesk';font-size:24px;font-weight:700;}
-.kpi-sub{font-size:12px;color:var(--ink-dim);margin-top:5px;}
+.kpi-card{background:var(--bg-panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;position:relative;overflow:hidden;transition:border-color .2s,box-shadow .2s;display:flex;align-items:flex-start;gap:13px;}
+.kpi-card:hover{border-color:var(--accent,var(--teal));box-shadow:0 4px 22px -6px var(--accent,var(--teal))33;}
+.kpi-icon{width:42px;height:42px;border-radius:11px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--accent-soft,var(--teal-soft));color:var(--accent,var(--teal));}
+.kpi-icon svg{width:20px;height:20px;}
+.kpi-body{min-width:0;}
+.kpi-label{font-size:11.5px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;font-weight:600;}
+.kpi-value{font-family:'Space Grotesk';font-size:23px;font-weight:700;line-height:1.1;}
+.kpi-sub{font-size:11.5px;color:var(--ink-dim);margin-top:5px;}
 .grid-2{display:grid;grid-template-columns:1.3fr 1fr;gap:14px;margin-bottom:14px;}
 .panel{background:var(--bg-panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;transition:background .3s,border-color .3s;}
 .panel h3{font-size:13.5px;margin:0 0 14px;display:flex;align-items:center;justify-content:space-between;font-weight:600;}
@@ -425,9 +429,23 @@ table.cat-table td.pn{font-family:'JetBrains Mono';color:var(--teal);}
         <div><div class="eyebrow">Ringkasan</div><h1>Dashboard Stock</h1><p>Gambaran umum inventory.</p></div>
       </div>
 
-      <div class="kpi-grid" style="grid-template-columns:repeat(2,1fr);max-width:520px;">
-        <div class="kpi-card" style="--accent:var(--amber)"><div class="kpi-label">Total Item</div><div class="kpi-value" id="kpiItems"><span class="spinner"></span></div><div class="kpi-sub" id="kpiItemsSub">memuat...</div></div>
-        <div class="kpi-card" style="--accent:var(--green)"><div class="kpi-label">Total Qty</div><div class="kpi-value" id="kpiQty"><span class="spinner"></span></div><div class="kpi-sub">akumulasi semua item</div></div>
+      <div class="kpi-grid">
+        <div class="kpi-card" style="--accent:var(--teal);--accent-soft:var(--teal-soft);">
+          <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
+          <div class="kpi-body"><div class="kpi-label">Total Item</div><div class="kpi-value" id="kpiItems"><span class="spinner"></span></div><div class="kpi-sub" id="kpiItemsSub">memuat...</div></div>
+        </div>
+        <div class="kpi-card" style="--accent:var(--green);--accent-soft:var(--green-soft);">
+          <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+          <div class="kpi-body"><div class="kpi-label">Tersedia</div><div class="kpi-value" id="kpiTersedia"><span class="spinner"></span></div><div class="kpi-sub">qty &gt; 0</div></div>
+        </div>
+        <div class="kpi-card" style="--accent:var(--amber);--accent-soft:var(--amber-soft);">
+          <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          <div class="kpi-body"><div class="kpi-label">Perlu Verifikasi</div><div class="kpi-value" id="kpiPerlu"><span class="spinner"></span></div><div class="kpi-sub">merk belum jelas</div></div>
+        </div>
+        <div class="kpi-card" style="--accent:var(--purple);--accent-soft:var(--purple-soft);">
+          <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+          <div class="kpi-body"><div class="kpi-label">Total Qty</div><div class="kpi-value" id="kpiQty"><span class="spinner"></span></div><div class="kpi-sub">akumulasi semua item</div></div>
+        </div>
       </div>
     </section>
 
@@ -438,7 +456,7 @@ table.cat-table td.pn{font-family:'JetBrains Mono';color:var(--teal);}
         <input type="text" id="searchInput" placeholder="Cari nama item, PN, merk, part of...">
         <select id="filterKlas"><option value="">Semua Klasifikasi</option></select>
         <button class="btn ghost small" id="resetFiltersBtn">Reset</button>
-        <button class="btn small" id="exportPdfBtn" style="margin-left:auto;background:var(--amber);color:#1A1208;display:flex;align-items:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Export PDF</button>
+        <button class="btn small" id="exportPdfBtn" style="margin-left:auto;background:var(--teal);color:#F5F9FF;display:flex;align-items:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Export PDF</button>
         <span class="result-count" id="resultCount"></span>
       </div>
       <div class="table-scroll">
@@ -716,7 +734,7 @@ function esc(s){ return (s||'').toString().replace(/[&<>"]/g,c=>({'&':'&amp;','<
 function rowKey(r){ return (r.stock_code||''); }
 const CLASS_COLORS={V:'#F2A33C',G:'#3FC7B0',P:'#9D7CF2',A:'#E2604E',I:'#5BA3E8',E:'#E8C75B',C:'#7FD17A',D:'#E88AC2',X:'#8C9BBF',Q:'#C97A1E'};
 function classColor(c){ return CLASS_COLORS[c]||'#5A6A8C'; }
-const KLAS_COLORS={'SPARE PART':'#5BA3E8','CONSUMABLE':'#3FC7B0','TOOLS':'#F2A33C','PPE':'#E2604E','GENERAL':'#8C9BBF'};
+const KLAS_COLORS={'SPARE PART':'#14B8A6','CONSUMABLE':'#3B82F6','TOOLS':'#F5A623','PPE':'#FB4B62','GENERAL':'#A855F7'};
 function klasColor(k){ return KLAS_COLORS[(k||'').toUpperCase()]||'#5A6A8C'; }
 
 /* ---------- PIN / auth ---------- */
@@ -822,7 +840,7 @@ function populateVisualFilterSelects(){
 
 /* ---------- dashboard ---------- */
 async function loadDashboard(){
-  ['kpiItems','kpiQty'].forEach(id=>{
+  ['kpiItems','kpiTersedia','kpiPerlu','kpiQty'].forEach(id=>{
     document.getElementById(id).innerHTML='<span class="spinner"></span>';
   });
 
@@ -832,6 +850,8 @@ async function loadDashboard(){
 
   document.getElementById('kpiItems').textContent   = fmtNum(data.total_items);
   document.getElementById('kpiItemsSub').textContent= 'total item di katalog';
+  document.getElementById('kpiTersedia').textContent= fmtNum(data.tersedia_count ?? 0);
+  document.getElementById('kpiPerlu').textContent   = fmtNum(data.perlu_verifikasi_count ?? 0);
   document.getElementById('kpiQty').textContent     = fmtNum(data.total_qty ?? 0);
   document.getElementById('navCatCount').textContent= fmtNum(data.total_items);
   document.getElementById('footUpdated').textContent= new Date().toLocaleString('id-ID',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
