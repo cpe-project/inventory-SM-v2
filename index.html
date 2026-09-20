@@ -436,6 +436,7 @@ table.cat-table td.pn{font-family:'JetBrains Mono';color:var(--teal);}
       <div class="page-head"><div><div class="eyebrow">Master Data</div><h1>Katalog Stock</h1><p>Cari, filter, dan urutkan seluruh item inventory.</p></div></div>
       <div class="toolbar">
         <input type="text" id="searchInput" placeholder="Cari nama item, PN, merk, part of...">
+        <select id="filterKlas"><option value="">Semua Klasifikasi</option></select>
         <button class="btn ghost small" id="resetFiltersBtn">Reset</button>
         <button class="btn small" id="exportPdfBtn" style="margin-left:auto;background:var(--amber);color:#1A1208;display:flex;align-items:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Export PDF</button>
         <span class="result-count" id="resultCount"></span>
@@ -450,6 +451,7 @@ table.cat-table td.pn{font-family:'JetBrains Mono';color:var(--teal);}
             <th data-col="uoi">Satuan</th>
             <th data-col="merk">Merk<span class="arrow"></span></th>
             <th data-col="part_of">Part of<span class="arrow"></span></th>
+            <th data-col="klasifikasi">Klasifikasi<span class="arrow"></span></th>
           </tr></thead>
           <tbody id="catTableBody"><tr class="loading-row"><td colspan="8"><span class="spinner"></span> Memuat data...</td></tr></tbody>
         </table>
@@ -468,6 +470,7 @@ table.cat-table td.pn{font-family:'JetBrains Mono';color:var(--teal);}
         <label style="display:flex;align-items:center;gap:6px;font-size:12.3px;color:var(--ink-dim);cursor:pointer;">
           <input type="checkbox" id="onlyWithImageChk" style="accent-color:var(--amber);"> Hanya yang punya foto
         </label>
+        <select id="filterKlas2"><option value="">Semua Klasifikasi</option></select>
         <button class="btn ghost small" id="resetFiltersBtn2">Reset</button>
         <span class="result-count" id="resultCount2"></span>
       </div>
@@ -713,6 +716,8 @@ function esc(s){ return (s||'').toString().replace(/[&<>"]/g,c=>({'&':'&amp;','<
 function rowKey(r){ return (r.stock_code||''); }
 const CLASS_COLORS={V:'#F2A33C',G:'#3FC7B0',P:'#9D7CF2',A:'#E2604E',I:'#5BA3E8',E:'#E8C75B',C:'#7FD17A',D:'#E88AC2',X:'#8C9BBF',Q:'#C97A1E'};
 function classColor(c){ return CLASS_COLORS[c]||'#5A6A8C'; }
+const KLAS_COLORS={'SPARE PART':'#5BA3E8','CONSUMABLE':'#3FC7B0','TOOLS':'#F2A33C','PPE':'#E2604E','GENERAL':'#8C9BBF'};
+function klasColor(k){ return KLAS_COLORS[(k||'').toUpperCase()]||'#5A6A8C'; }
 
 /* ---------- PIN / auth ---------- */
 function showPinModal(){
@@ -797,8 +802,22 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
 });
 
 /* ---------- filter options ---------- */
+let klasifikasiOptions = [];
 async function loadFilterOptions(){
-  // tidak ada dimensi filter lagi (warehouse & class sudah dihapus)
+  const { data } = await sb.rpc('get_klasifikasi_options');
+  klasifikasiOptions = data || [];
+}
+function fillKlasSelect(sel){
+  const current = sel.value;
+  sel.innerHTML = '<option value="">Semua Klasifikasi</option>' +
+    klasifikasiOptions.map(k=>`<option value="${esc(k)}">${esc(k)}</option>`).join('');
+  sel.value = current;
+}
+function populateFilterSelects(){
+  fillKlasSelect(document.getElementById('filterKlas'));
+}
+function populateVisualFilterSelects(){
+  fillKlasSelect(document.getElementById('filterKlas2'));
 }
 
 /* ---------- dashboard ---------- */
@@ -858,16 +877,18 @@ function buildSearchFilter(query, q){
 
 function buildKatalogQuery(){
   const q=document.getElementById('searchInput').value.trim();
+  const klas=document.getElementById('filterKlas').value;
   let query=sb.from('items').select('*',{count:'exact'});
   query = buildSearchFilter(query, q);
+  if(klas) query = query.eq('klasifikasi', klas);
   query=query.order(sortCol,{ascending:sortAsc});
   return query;
 }
 async function fetchKatalogPage(){
-  document.getElementById('catTableBody').innerHTML='<tr class="loading-row"><td colspan="7"><span class="spinner"></span> Memuat...</td></tr>';
+  document.getElementById('catTableBody').innerHTML='<tr class="loading-row"><td colspan="8"><span class="spinner"></span> Memuat...</td></tr>';
   const from=(currentPage-1)*PAGE_SIZE, to=from+PAGE_SIZE-1;
   const { data, count, error }=await buildKatalogQuery().range(from,to);
-  if(error){ document.getElementById('catTableBody').innerHTML=`<tr class="loading-row"><td colspan="7" style="color:var(--red);">Error: ${esc(error.message)}</td></tr>`; return; }
+  if(error){ document.getElementById('catTableBody').innerHTML=`<tr class="loading-row"><td colspan="8" style="color:var(--red);">Error: ${esc(error.message)}</td></tr>`; return; }
   totalItems=count||0;
   // preload images for this page
   await preloadImages(data||[]);
@@ -877,7 +898,7 @@ async function fetchKatalogPage(){
 }
 function renderKatalogRows(rows){
   const tbody=document.getElementById('catTableBody');
-  if(!rows.length){ tbody.innerHTML='<tr class="loading-row"><td colspan="7">Tidak ada item.</td></tr>'; return; }
+  if(!rows.length){ tbody.innerHTML='<tr class="loading-row"><td colspan="8">Tidak ada item.</td></tr>'; return; }
   tbody.innerHTML=rows.map(r=>{
     const key=rowKey(r), imgUrl=imgCache.get(key);
     return `<tr data-key="${esc(key)}">
@@ -888,6 +909,7 @@ function renderKatalogRows(rows){
       <td>${esc(r.uoi||'')}</td>
       <td style="color:var(--ink-dim);font-size:12px;">${esc(r.merk||'')}</td>
       <td style="color:var(--ink-dim);font-size:12px;">${esc(r.part_of||'')}</td>
+      <td>${r.klasifikasi?`<span class="chip" style="background:${klasColor(r.klasifikasi)}22;color:${klasColor(r.klasifikasi)};font-size:10.5px;">${esc(r.klasifikasi)}</span>`:''}</td>
     </tr>`;
   }).join('');
   tbody.querySelectorAll('tr[data-key]').forEach(tr=>tr.addEventListener('click',()=>openModal(tr.dataset.key)));
@@ -905,21 +927,25 @@ document.querySelectorAll('#page-katalog thead th[data-col]').forEach(th=>{
 });
 let searchDebounce;
 document.getElementById('searchInput').addEventListener('input',()=>{ clearTimeout(searchDebounce); searchDebounce=setTimeout(()=>{ currentPage=1; fetchKatalogPage(); },300); });
+document.getElementById('filterKlas').addEventListener('change',()=>{ currentPage=1; fetchKatalogPage(); });
 document.getElementById('resetFiltersBtn').addEventListener('click',()=>{
   document.getElementById('searchInput').value='';
+  document.getElementById('filterKlas').value='';
   currentPage=1; fetchKatalogPage();
 });
 
 /* ---------- katalog visual (kartu) ---------- */
 let sortCol2='item_name', sortAsc2=true;
-const VISUAL_COLS = 'stock_code,item_name,uoi,qty,merk,part_of';
+const VISUAL_COLS = 'stock_code,item_name,uoi,qty,merk,part_of,klasifikasi';
 
 function buildVisualQuery(){
   const q=document.getElementById('searchInput2').value.trim();
+  const klas=document.getElementById('filterKlas2').value;
   const onlyImg=document.getElementById('onlyWithImageChk').checked;
   // Pilih kolom spesifik — jauh lebih cepat dari select('*')
   let query=sb.from('items').select(VISUAL_COLS,{count:'exact'});
   query = buildSearchFilter(query, q);
+  if(klas) query = query.eq('klasifikasi', klas);
   query=query.order(sortCol2,{ascending:sortAsc2});
   return { query, onlyImg };
 }
@@ -943,9 +969,11 @@ async function fetchVisualPage(){
       return;
     }
     const q=document.getElementById('searchInput2').value.trim();
+    const klas2=document.getElementById('filterKlas2').value;
     let filteredQuery=sb.from('items').select(VISUAL_COLS,{count:'exact'})
       .in('stock_code',[...new Set(imgStockCodes)]);
     filteredQuery = buildSearchFilter(filteredQuery, q);
+    if(klas2) filteredQuery = filteredQuery.eq('klasifikasi', klas2);
     filteredQuery=filteredQuery.order(sortCol2,{ascending:sortAsc2});
     const from=(currentPage2-1)*PAGE2_SIZE, to=from+PAGE2_SIZE-1;
     const { data, count, error }=await filteredQuery.range(from,to);
@@ -992,6 +1020,7 @@ function renderCardGrid(rows){
         <div class="prod-meta">
           <span style="font-family:JetBrains Mono;font-size:10.5px;color:var(--ink-faint);">${esc(r.uoi||'')}</span>
           <span class="chip" style="background:#5A6A8C22;color:#5A6A8C;font-size:10px;">${esc(r.part_of||'-')}</span>
+          ${r.klasifikasi?`<span class="chip" style="background:${klasColor(r.klasifikasi)}22;color:${klasColor(r.klasifikasi)};font-size:10px;">${esc(r.klasifikasi)}</span>`:''}
         </div>
         <div class="prod-foot">
           <span class="soh">Qty <strong>${fmtNum(r.qty)}</strong></span>
@@ -1003,10 +1032,11 @@ function renderCardGrid(rows){
 }
 let searchDebounce2;
 document.getElementById('searchInput2').addEventListener('input',()=>{ clearTimeout(searchDebounce2); searchDebounce2=setTimeout(()=>{ currentPage2=1; fetchVisualPage(); },500); });
-['onlyWithImageChk'].forEach(id=>document.getElementById(id).addEventListener('change',()=>{ currentPage2=1; fetchVisualPage(); }));
+['onlyWithImageChk','filterKlas2'].forEach(id=>document.getElementById(id).addEventListener('change',()=>{ currentPage2=1; fetchVisualPage(); }));
 document.getElementById('resetFiltersBtn2').addEventListener('click',()=>{
   document.getElementById('searchInput2').value='';
   document.getElementById('onlyWithImageChk').checked=false;
+  document.getElementById('filterKlas2').value='';
   currentPage2=1; fetchVisualPage();
 });
 
@@ -1056,7 +1086,8 @@ async function openModal(key){
   const fields=[
     ['PN',data.stock_code||'-'],
     ['Qty',fmtNum(data.qty)],['Satuan',data.uoi||'-'],
-    ['Merk',data.merk||'-'],['Part of',data.part_of||'-']
+    ['Merk',data.merk||'-'],['Part of',data.part_of||'-'],
+    ['Klasifikasi',data.klasifikasi||'-']
   ];
   document.getElementById('modalDetailGrid').innerHTML=fields.map(([l,v])=>`<div class="detail-item"><div class="lbl">${l}</div><div class="v">${esc(v)}</div></div>`).join('');
   await refreshModalImg(key);
@@ -1390,7 +1421,7 @@ async function loadGallery(page=1){
 
 /* ---------- excel upload ---------- */
 const EXCEL_TO_DB={
-  'NAMA PART':'item_name','PN':'stock_code','QTY':'qty','SATUAN':'uoi','MERK':'merk','PART OF':'part_of'
+  'ITEM NAME':'item_name','PN':'stock_code','QTY':'qty','SATUAN':'uoi','BRAND':'merk','REMARK':'part_of','KLASIFIKASI ITEM':'klasifikasi'
 };
 const NUM_COLS=new Set(['qty']);
 
@@ -1753,22 +1784,24 @@ document.getElementById('exportPdfBtn').addEventListener('click', async () => {
       r.uoi || '-',
       r.merk || '-',
       r.part_of || '-',
+      r.klasifikasi || '-',
     ]);
 
     doc.autoTable({
       startY: 32,
-      head: [['PN','Nama Part','Qty','Satuan','Merk','Part of']],
+      head: [['PN','Nama Part','Qty','Satuan','Merk','Part of','Klasifikasi']],
       body: rows,
       styles: { fontSize: 7.5, cellPadding: 2.5, textColor: [232,236,246], fillColor: [17,26,46] },
       headStyles: { fillColor: [242,163,60], textColor: [26,18,8], fontStyle: 'bold', fontSize: 8 },
       alternateRowStyles: { fillColor: [14,22,38] },
       columnStyles: {
-        0: { cellWidth: 30 },
+        0: { cellWidth: 28 },
         1: { cellWidth: 'auto' },
-        2: { cellWidth: 20, halign: 'right' },
-        3: { cellWidth: 20 },
-        4: { cellWidth: 26 },
-        5: { cellWidth: 26 },
+        2: { cellWidth: 18, halign: 'right' },
+        3: { cellWidth: 18 },
+        4: { cellWidth: 24 },
+        5: { cellWidth: 24 },
+        6: { cellWidth: 26 },
       },
       margin: { left: 14, right: 14 },
       didDrawPage: (d) => {
