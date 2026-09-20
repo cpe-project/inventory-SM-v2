@@ -137,6 +137,14 @@ table.data-mini td.num,table.data-mini th.num{text-align:right;font-family:'JetB
 .btn.ghost:hover{border-color:var(--amber);color:var(--amber);}
 .btn.small{padding:5px 10px;font-size:11.5px;}
 .result-count{font-size:11.5px;color:var(--ink-faint);font-family:'JetBrains Mono';white-space:nowrap;}
+.mode-toggle{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px;}
+.mode-opt{padding:7px 15px;border-radius:8px;font-size:12.5px;font-weight:600;color:var(--ink-dim);cursor:pointer;transition:background .15s,color .15s;user-select:none;}
+.mode-opt.active{background:var(--teal);color:#F5F9FF;}
+.mode-opt.active.mode-danger{background:var(--red);color:#fff;}
+details.hist-details summary{cursor:pointer;font-weight:600;color:var(--ink-dim);font-size:12.5px;list-style:none;}
+details.hist-details summary::-webkit-details-marker{display:none;}
+details.hist-details summary::before{content:'▸ ';color:var(--ink-faint);}
+details.hist-details[open] summary::before{content:'▾ ';}
 .table-scroll{background:var(--bg-panel);border:1px solid var(--line);border-radius:var(--radius);overflow:auto;max-height:62vh;}
 table.cat-table{width:100%;border-collapse:collapse;font-size:12.3px;min-width:1100px;}
 table.cat-table thead th{position:sticky;top:0;background:var(--bg-panel-2);text-align:left;padding:9px 10px;color:var(--ink-dim);font-weight:600;font-size:10.6px;text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--line);cursor:pointer;white-space:nowrap;user-select:none;}
@@ -508,69 +516,43 @@ table.cat-table td.pn{font-family:'JetBrains Mono';color:var(--teal);}
 
       <div id="uploadAuthBanner" class="note-banner warn" style="display:none;">🔒 Fitur ini memerlukan login PIN editor. <button class="btn small" style="margin-left:8px;" onclick="showPinModal()">Login PIN</button></div>
 
-      <!-- INFO BANNER -->
-      <div style="background:var(--teal-soft);border:1px solid #00D4FF30;border-radius:10px;padding:12px 16px;margin-bottom:18px;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--teal);">
-        <span style="font-size:18px;">✅</span>
-        <span>Data diupload langsung ke Supabase — tersimpan permanen dan langsung terlihat oleh semua pengguna.</span>
-      </div>
+      <div class="panel" style="max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:16px;">
 
-      <div class="grid-2">
-        <!-- UPLOAD PANEL -->
-        <div class="panel" style="display:flex;flex-direction:column;gap:14px;">
-          <h3 style="margin:0;">Upload File Excel</h3>
-
-          <!-- DROPZONE -->
-          <div class="dropzone" id="dropzone" style="border:2px dashed var(--line);border-radius:12px;padding:32px 20px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;background:var(--bg);">
-            <div style="font-size:36px;margin-bottom:10px;">📤</div>
-            <div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:6px;">Drag & drop file di sini</div>
-            <div style="font-size:12px;color:var(--ink-faint);margin-bottom:12px;">atau klik untuk pilih file</div>
-            <div style="display:inline-block;background:var(--teal-soft);border:1px solid #00D4FF40;color:var(--teal);font-size:11px;padding:4px 12px;border-radius:20px;">.xlsx · .xls · .xlsb · .csv</div>
-            <input type="file" id="fileInput" accept=".xlsx,.xls,.xlsb,.csv" style="display:none;">
-          </div>
-
-          <!-- ACTIONS -->
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="btn" id="downloadTemplateBtn" style="display:flex;align-items:center;gap:6px;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Download Template
-            </button>
-          </div>
-
-          <!-- LOG -->
-          <div class="log-box" id="uploadLog" style="background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px;font-size:12px;font-family:'JetBrains Mono',monospace;min-height:80px;color:var(--ink-dim);">Menunggu file diupload...</div>
+        <!-- DROPZONE -->
+        <div class="dropzone" id="dropzone" style="border:2px dashed var(--line);border-radius:12px;padding:30px 20px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;background:var(--bg);">
+          <div style="font-size:32px;margin-bottom:8px;">📤</div>
+          <div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:4px;">Drag &amp; drop file di sini</div>
+          <div style="font-size:12px;color:var(--ink-faint);margin-bottom:10px;">atau klik untuk pilih file · .xlsx · .xls · .xlsb · .csv</div>
+          <div style="font-size:11px;color:var(--teal);">✅ Tersimpan langsung ke Supabase, terlihat oleh semua pengguna</div>
+          <input type="file" id="fileInput" accept=".xlsx,.xls,.xlsb,.csv" style="display:none;">
         </div>
 
-        <!-- MODE + HISTORY PANEL -->
-        <div style="display:flex;flex-direction:column;gap:14px;">
-
-          <!-- MODE UPDATE -->
-          <div class="panel">
-            <h3 style="margin:0 0 14px;">Mode Update</h3>
-            <div style="display:flex;flex-direction:column;gap:12px;">
-              <label style="display:flex;gap:12px;align-items:flex-start;cursor:pointer;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px 14px;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='var(--line)'">
-                <input type="radio" name="updateMode" value="upsert" checked style="margin-top:2px;accent-color:var(--teal);">
-                <div>
-                  <div style="font-size:13px;font-weight:600;color:var(--teal);margin-bottom:3px;">Merge / Upsert</div>
-                  <div style="font-size:12px;color:var(--ink-faint);">Baris dengan PN (Stock Code) yang sama ditimpa, baris baru ditambahkan ke database.</div>
-                </div>
-              </label>
-              <label style="display:flex;gap:12px;align-items:flex-start;cursor:pointer;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px 14px;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--line)'">
-                <input type="radio" name="updateMode" value="replace" style="margin-top:2px;accent-color:var(--red);">
-                <div>
-                  <div style="font-size:13px;font-weight:600;color:var(--red);margin-bottom:3px;">Replace Penuh</div>
-                  <div style="font-size:12px;color:var(--ink-faint);">Seluruh tabel dihapus lalu diisi ulang dengan data dari file yang diupload.</div>
-                </div>
-              </label>
-            </div>
+        <!-- MODE + TEMPLATE (compact single row) -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+          <div class="mode-toggle" id="modeToggle">
+            <label class="mode-opt active" data-desc="Baris dengan PN (Stock Code) yang sama ditimpa, baris baru ditambahkan ke database.">
+              <input type="radio" name="updateMode" value="upsert" checked hidden>Merge / Upsert
+            </label>
+            <label class="mode-opt mode-danger-opt" data-desc="Seluruh tabel dihapus lalu diisi ulang dengan data dari file yang diupload.">
+              <input type="radio" name="updateMode" value="replace" hidden>Replace Penuh
+            </label>
           </div>
-
-          <!-- RIWAYAT -->
-          <div class="panel">
-            <h3 style="margin:0 0 12px;">Riwayat Upload Sesi Ini</h3>
-            <div id="uploadHistory" style="font-size:12px;color:var(--ink-faint);">Belum ada upload pada sesi ini.</div>
-          </div>
-
+          <button class="btn ghost small" id="downloadTemplateBtn" style="display:flex;align-items:center;gap:5px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download Template
+          </button>
         </div>
+        <div id="modeDesc" style="font-size:11.5px;color:var(--ink-faint);margin-top:-8px;">Baris dengan PN (Stock Code) yang sama ditimpa, baris baru ditambahkan ke database.</div>
+
+        <!-- LOG -->
+        <div class="log-box" id="uploadLog" style="background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px;font-size:12px;font-family:'JetBrains Mono',monospace;min-height:70px;color:var(--ink-dim);">Menunggu file diupload...</div>
+
+        <!-- RIWAYAT (collapsible, tucked away by default) -->
+        <details class="hist-details">
+          <summary>Riwayat Upload Sesi Ini</summary>
+          <div id="uploadHistory" style="font-size:12px;color:var(--ink-faint);margin-top:8px;">Belum ada upload pada sesi ini.</div>
+        </details>
+
       </div>
     </section>
 
@@ -1451,6 +1433,15 @@ function logUp(msg,cls){
   d.className=cls||''; d.textContent='› '+msg;
   box.appendChild(d); box.scrollTop=box.scrollHeight;
 }
+document.querySelectorAll('#modeToggle .mode-opt').forEach(opt=>{
+  opt.addEventListener('click',()=>{
+    document.querySelectorAll('#modeToggle .mode-opt').forEach(o=>{ o.classList.remove('active','mode-danger'); });
+    opt.classList.add('active');
+    if(opt.classList.contains('mode-danger-opt')) opt.classList.add('mode-danger');
+    opt.querySelector('input[type=radio]').checked=true;
+    document.getElementById('modeDesc').textContent=opt.dataset.desc;
+  });
+});
 const dropzone=document.getElementById('dropzone');
 const fileInput=document.getElementById('fileInput');
 dropzone.addEventListener('click',()=>{ if(!isEditor){ showPinModal(); return; } fileInput.click(); });
