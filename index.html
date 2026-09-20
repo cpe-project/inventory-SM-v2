@@ -401,10 +401,6 @@ table.cat-table td.pn{font-family:'JetBrains Mono';color:var(--teal);}
         Katalog
         <span class="count-pill" id="navCatCount">—</span>
       </button>
-      <button class="tab-btn" data-page="katalogvisual">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-        Katalog Visual
-      </button>
       <button class="tab-btn nav-editor-only" data-page="upload">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 21h14"/></svg>
         Update Data (Excel)
@@ -462,63 +458,72 @@ table.cat-table td.pn{font-family:'JetBrains Mono';color:var(--teal);}
       </div>
     </section>
 
-    <!-- KATALOG -->
+    <!-- KATALOG (Tabel + Visual, satu halaman dengan toggle tampilan) -->
     <section class="page" id="page-katalog">
-      <div class="page-head"><div><div class="eyebrow">Master Data</div><h1>Katalog Stock</h1><p>Cari, filter, dan urutkan seluruh item inventory.</p></div></div>
-      <div class="toolbar">
-        <input type="text" id="searchInput" placeholder="Cari nama item, PN, merk, part of...">
-        <select id="filterKlas"><option value="">Semua Klasifikasi</option></select>
-        <button class="btn ghost small" id="resetFiltersBtn">Reset</button>
-        <div class="export-dropdown">
-          <button class="btn small" id="exportMenuBtn" style="background:var(--teal);color:#F5F9FF;display:flex;align-items:center;gap:6px;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Export
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="margin-left:1px;"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <div class="export-menu" id="exportMenu">
-            <button type="button" id="exportPdfBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Export PDF</button>
-            <button type="button" id="exportExcelBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9.5" y1="13" x2="14.5" y2="18"/><line x1="14.5" y1="13" x2="9.5" y2="18"/></svg> Export Excel</button>
-          </div>
+      <div class="page-head">
+        <div><div class="eyebrow">Master Data</div><h1>Katalog Stock</h1><p>Cari, filter, dan urutkan seluruh item inventory.</p></div>
+        <div class="mode-toggle" id="katalogViewToggle">
+          <button type="button" class="mode-opt active" data-view="tabel">▤ Tabel</button>
+          <button type="button" class="mode-opt" data-view="visual">▦ Visual</button>
         </div>
-        <span class="result-count" id="resultCount"></span>
       </div>
-      <div class="table-scroll">
-        <table class="cat-table">
-          <thead><tr>
-            <th style="width:36px;"></th>
-            <th data-col="stock_code">PN<span class="arrow"></span></th>
-            <th data-col="item_name">Nama Part<span class="arrow"></span></th>
-            <th class="num" data-col="qty">Qty<span class="arrow"></span></th>
-            <th data-col="uoi">Satuan</th>
-            <th data-col="merk">Merk<span class="arrow"></span></th>
-            <th data-col="part_of">Part of<span class="arrow"></span></th>
-            <th data-col="klasifikasi">Klasifikasi<span class="arrow"></span></th>
-          </tr></thead>
-          <tbody id="catTableBody"><tr class="loading-row"><td colspan="8"><span class="spinner"></span> Memuat data...</td></tr></tbody>
-        </table>
-      </div>
-      <div class="pagination">
-        <span class="result-count" id="pageInfo"></span>
-        <div class="pg-btns" id="pgBtns"></div>
-      </div>
-    </section>
 
-    <!-- KATALOG VISUAL -->
-    <section class="page" id="page-katalogvisual">
-      <div class="page-head"><div><div class="eyebrow">Master Data · Tampilan Visual</div><h1>Katalog Visual</h1><p>Tampilan kartu bergambar per item inventory.</p></div></div>
-      <div class="toolbar">
-        <input type="text" id="searchInput2" placeholder="Cari nama item, PN, merk, part of...">
-        <label style="display:flex;align-items:center;gap:6px;font-size:12.3px;color:var(--ink-dim);cursor:pointer;">
-          <input type="checkbox" id="onlyWithImageChk" style="accent-color:var(--amber);"> Hanya yang punya foto
-        </label>
-        <select id="filterKlas2"><option value="">Semua Klasifikasi</option></select>
-        <button class="btn ghost small" id="resetFiltersBtn2">Reset</button>
-        <span class="result-count" id="resultCount2"></span>
+      <!-- VIEW: TABEL -->
+      <div id="katalogViewTabel">
+        <div class="toolbar">
+          <input type="text" id="searchInput" placeholder="Cari nama item, PN, merk, part of...">
+          <select id="filterKlas"><option value="">Semua Klasifikasi</option></select>
+          <button class="btn ghost small" id="resetFiltersBtn">Reset</button>
+          <div class="export-dropdown">
+            <button class="btn small" id="exportMenuBtn" style="background:var(--teal);color:#F5F9FF;display:flex;align-items:center;gap:6px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Export
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="margin-left:1px;"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="export-menu" id="exportMenu">
+              <button type="button" id="exportPdfBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Export PDF</button>
+              <button type="button" id="exportExcelBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9.5" y1="13" x2="14.5" y2="18"/><line x1="14.5" y1="13" x2="9.5" y2="18"/></svg> Export Excel</button>
+            </div>
+          </div>
+          <span class="result-count" id="resultCount"></span>
+        </div>
+        <div class="table-scroll">
+          <table class="cat-table">
+            <thead><tr>
+              <th style="width:36px;"></th>
+              <th data-col="stock_code">PN<span class="arrow"></span></th>
+              <th data-col="item_name">Nama Part<span class="arrow"></span></th>
+              <th class="num" data-col="qty">Qty<span class="arrow"></span></th>
+              <th data-col="uoi">Satuan</th>
+              <th data-col="merk">Merk<span class="arrow"></span></th>
+              <th data-col="part_of">Part of<span class="arrow"></span></th>
+              <th data-col="klasifikasi">Klasifikasi<span class="arrow"></span></th>
+            </tr></thead>
+            <tbody id="catTableBody"><tr class="loading-row"><td colspan="8"><span class="spinner"></span> Memuat data...</td></tr></tbody>
+          </table>
+        </div>
+        <div class="pagination">
+          <span class="result-count" id="pageInfo"></span>
+          <div class="pg-btns" id="pgBtns"></div>
+        </div>
       </div>
-      <div class="card-grid" id="cardGrid"><div class="empty-state" style="grid-column:1/-1"><span class="spinner"></span></div></div>
-      <div class="pagination">
-        <span class="result-count" id="pageInfo2"></span>
-        <div class="pg-btns" id="pgBtns2"></div>
+
+      <!-- VIEW: VISUAL -->
+      <div id="katalogViewVisual" style="display:none;">
+        <div class="toolbar">
+          <input type="text" id="searchInput2" placeholder="Cari nama item, PN, merk, part of...">
+          <label style="display:flex;align-items:center;gap:6px;font-size:12.3px;color:var(--ink-dim);cursor:pointer;">
+            <input type="checkbox" id="onlyWithImageChk" style="accent-color:var(--amber);"> Hanya yang punya foto
+          </label>
+          <select id="filterKlas2"><option value="">Semua Klasifikasi</option></select>
+          <button class="btn ghost small" id="resetFiltersBtn2">Reset</button>
+          <span class="result-count" id="resultCount2"></span>
+        </div>
+        <div class="card-grid" id="cardGrid"><div class="empty-state" style="grid-column:1/-1"><span class="spinner"></span></div></div>
+        <div class="pagination">
+          <span class="result-count" id="pageInfo2"></span>
+          <div class="pg-btns" id="pgBtns2"></div>
+        </div>
       </div>
     </section>
 
@@ -704,6 +709,7 @@ let isEditor       = false;
 let editorToken    = sessionStorage.getItem('editor_token') || null;
 let currentPage    = 1;
 let currentPage2   = 1;
+let katalogView    = 'tabel';
 let totalItems     = 0;
 let totalItems2    = 0;
 let sortCol        = 'item_name';
@@ -810,8 +816,10 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
     document.getElementById('page-'+btn.dataset.page).classList.add('active');
     document.getElementById('sidebar').classList.remove('open');
     const pg=btn.dataset.page;
-    if(pg==='katalog')      { populateFilterSelects(); fetchKatalogPage(); }
-    if(pg==='katalogvisual'){ populateVisualFilterSelects(); fetchVisualPage(); }
+    if(pg==='katalog'){
+      if(katalogView==='visual'){ populateVisualFilterSelects(); fetchVisualPage(); }
+      else{ populateFilterSelects(); fetchKatalogPage(); }
+    }
     if(pg==='galeri')       { loadGallery(); }
   });
 });
@@ -1314,9 +1322,9 @@ function refreshModalImgActions(){
       await refreshModalImg(key);
       document.getElementById('navImgCount').textContent=await getImageCount();
       await loadImageIndex();
-      if(document.getElementById('page-katalogvisual').classList.contains('active')) fetchVisualPage();
+      if(document.getElementById('page-katalog').classList.contains('active') && katalogView==='visual') fetchVisualPage();
       if(document.getElementById('page-galeri').classList.contains('active')) loadGallery();
-      if(document.getElementById('page-katalog').classList.contains('active')) fetchKatalogPage();
+      if(document.getElementById('page-katalog').classList.contains('active') && katalogView==='tabel') fetchKatalogPage();
     }catch(err){ alert('Gagal upload: '+err.message); }
   });
 
@@ -1331,9 +1339,9 @@ function refreshModalImgActions(){
     await refreshModalImg(key);
     document.getElementById('navImgCount').textContent=await getImageCount();
     await loadImageIndex();
-    if(document.getElementById('page-katalogvisual').classList.contains('active')) fetchVisualPage();
+    if(document.getElementById('page-katalog').classList.contains('active') && katalogView==='visual') fetchVisualPage();
     if(document.getElementById('page-galeri').classList.contains('active')) loadGallery();
-    if(document.getElementById('page-katalog').classList.contains('active')) fetchKatalogPage();
+    if(document.getElementById('page-katalog').classList.contains('active') && katalogView==='tabel') fetchKatalogPage();
   });
 }
 document.getElementById('modalCloseBtn').addEventListener('click',()=>document.getElementById('modalOverlay').classList.remove('open'));
@@ -1448,6 +1456,23 @@ function logUp(msg,cls){
   d.className=cls||''; d.textContent='› '+msg;
   box.appendChild(d); box.scrollTop=box.scrollHeight;
 }
+document.querySelectorAll('#katalogViewToggle .mode-opt').forEach(opt=>{
+  opt.addEventListener('click',()=>{
+    if(opt.classList.contains('active')) return;
+    document.querySelectorAll('#katalogViewToggle .mode-opt').forEach(o=>o.classList.remove('active'));
+    opt.classList.add('active');
+    katalogView = opt.dataset.view;
+    if(katalogView==='visual'){
+      document.getElementById('katalogViewTabel').style.display='none';
+      document.getElementById('katalogViewVisual').style.display='';
+      populateVisualFilterSelects(); fetchVisualPage();
+    } else {
+      document.getElementById('katalogViewVisual').style.display='none';
+      document.getElementById('katalogViewTabel').style.display='';
+      populateFilterSelects(); fetchKatalogPage();
+    }
+  });
+});
 document.querySelectorAll('#modeToggle .mode-opt').forEach(opt=>{
   opt.addEventListener('click',()=>{
     document.querySelectorAll('#modeToggle .mode-opt').forEach(o=>{ o.classList.remove('active','mode-danger'); });
@@ -1731,9 +1756,9 @@ document.getElementById('camSaveBtn').addEventListener('click', async()=>{
     imgCache.delete(activeModalKey);
     await refreshModalImg(activeModalKey);
     document.getElementById('navImgCount').textContent = await getImageCount();
-    if(document.getElementById('page-katalogvisual').classList.contains('active')) fetchVisualPage();
+    if(document.getElementById('page-katalog').classList.contains('active') && katalogView==='visual') fetchVisualPage();
     if(document.getElementById('page-galeri').classList.contains('active')) loadGallery();
-    if(document.getElementById('page-katalog').classList.contains('active')) fetchKatalogPage();
+    if(document.getElementById('page-katalog').classList.contains('active') && katalogView==='tabel') fetchKatalogPage();
     // Reset semua state kamera untuk foto berikutnya
     camCapturedDataUrl = null;
     btn.textContent = '✅ Simpan Foto';
