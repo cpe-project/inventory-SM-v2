@@ -1800,6 +1800,49 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeLightbox(); 
   await Promise.all([loadFilterOptions(), loadDashboard(), loadImageIndex()]);
 })();
 
+/* -------- helper: ambil foto item sebagai thumbnail dataURL kecil (untuk PDF) -------- */
+async function urlToThumbDataURL(url, size=90, quality=0.6){
+  const resp = await fetch(url, { mode:'cors' });
+  if(!resp.ok) throw new Error('fetch image failed');
+  const blob = await resp.blob();
+  const objUrl = URL.createObjectURL(blob);
+  try{
+    const img = await new Promise((resolve,reject)=>{
+      const im = new Image();
+      im.onload = ()=>resolve(im);
+      im.onerror = reject;
+      im.src = objUrl;
+    });
+    const canvas = document.createElement('canvas');
+    canvas.width = size; canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    const s = Math.min(img.width, img.height);
+    const sx = (img.width - s)/2, sy = (img.height - s)/2;
+    ctx.drawImage(img, sx, sy, s, s, 0, 0, size, size);
+    return canvas.toDataURL('image/jpeg', quality);
+  } finally {
+    URL.revokeObjectURL(objUrl);
+  }
+}
+
+async function loadPhotosForExport(rows, onProgress){
+  const targets = rows.filter(r => imgCache.get(r.stock_code));
+  const map = {};
+  if(!targets.length) return map;
+  let idx = 0, done = 0;
+  async function worker(){
+    while(idx < targets.length){
+      const r = targets[idx++];
+      try{ map[r.stock_code] = await urlToThumbDataURL(imgCache.get(r.stock_code)); }
+      catch(e){ map[r.stock_code] = null; }
+      done++;
+      onProgress?.(done, targets.length);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(6, targets.length) }, worker));
+  return map;
+}
+
 /* -------- EXPORT PDF KATALOG -------- */
 document.getElementById('exportPdfBtn').addEventListener('click', async () => {
   const btn = document.getElementById('exportPdfBtn');
@@ -1811,6 +1854,12 @@ document.getElementById('exportPdfBtn').addEventListener('click', async () => {
     let query = buildKatalogQuery();
     const { data, error } = await query;
     if (error) throw error;
+
+    btn.innerHTML = '<span class="spinner"></span> Memuat foto...';
+    const photoMap = await loadPhotosForExport(data || [], (done, total) => {
+      if(total) btn.innerHTML = `<span class="spinner"></span> Memuat foto ${done}/${total}...`;
+    });
+    btn.innerHTML = '<span class="spinner"></span> Membuat PDF...';
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
@@ -1829,6 +1878,7 @@ document.getElementById('exportPdfBtn').addEventListener('click', async () => {
 
     // Tabel
     const rows = (data || []).map(r => [
+      '',
       r.stock_code || '-',
       r.item_name || '-',
       r.qty != null ? r.qty : '-',
@@ -1840,21 +1890,35 @@ document.getElementById('exportPdfBtn').addEventListener('click', async () => {
 
     doc.autoTable({
       startY: 32,
-      head: [['PN','Nama Part','Qty','Satuan','Merk','Part of','Klasifikasi']],
+      head: [['Foto','PN','Nama Part','Qty','Satuan','Merk','Part of','Klasifikasi']],
       body: rows,
-      styles: { fontSize: 7.5, cellPadding: 2.5, textColor: [232,236,246], fillColor: [17,26,46] },
+      styles: { fontSize: 7.5, cellPadding: 2.5, textColor: [232,236,246], fillColor: [17,26,46], minCellHeight: 16 },
       headStyles: { fillColor: [242,163,60], textColor: [26,18,8], fontStyle: 'bold', fontSize: 8 },
       alternateRowStyles: { fillColor: [14,22,38] },
       columnStyles: {
-        0: { cellWidth: 28 },
-        1: { cellWidth: 'auto' },
-        2: { cellWidth: 18, halign: 'right' },
-        3: { cellWidth: 18 },
-        4: { cellWidth: 24 },
-        5: { cellWidth: 24 },
-        6: { cellWidth: 26 },
+        0: { cellWidth: 16 },
+        1: { cellWidth: 26 },
+        2: { cellWidth: 'auto' },
+        3: { cellWidth: 14, halign: 'right' },
+        4: { cellWidth: 16 },
+        5: { cellWidth: 22 },
+        6: { cellWidth: 22 },
+        7: { cellWidth: 24 },
       },
       margin: { left: 14, right: 14 },
+      didDrawCell: (d) => {
+        if(d.section === 'body' && d.column.index === 0){
+          const r = (data||[])[d.row.index];
+          const imgData = r && photoMap[r.stock_code];
+          if(imgData){
+            const pad = 1.2;
+            const size = Math.min(d.cell.width, d.cell.height) - pad*2;
+            const x = d.cell.x + (d.cell.width - size)/2;
+            const y = d.cell.y + (d.cell.height - size)/2;
+            try{ doc.addImage(imgData, 'JPEG', x, y, size, size); } catch(err){}
+          }
+        }
+      },
       didDrawPage: (d) => {
         // Footer tiap halaman
         doc.setFontSize(7);
