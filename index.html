@@ -368,6 +368,31 @@ table.cat-table td.pn{font-family:'JetBrains Mono';color:var(--teal);}
   </div>
 </div>
 
+<!-- EDIT PN/NAMA ITEM OVERLAY -->
+<div class="pin-overlay hidden" id="editIdentityOverlay">
+  <div class="pin-box" style="max-width:380px;">
+    <h2>Koreksi PN / Nama Item</h2>
+    <p>Untuk memperbaiki PN atau nama item yang salah input. Foto dan riwayat stok item ini akan otomatis ikut menyesuaikan ke PN baru.</p>
+    <div style="text-align:left;display:flex;flex-direction:column;gap:12px;margin-bottom:12px;">
+      <div>
+        <label style="font-size:11px;color:var(--ink-dim);display:block;margin-bottom:4px;">PN (Stock Code)</label>
+        <input type="text" id="editPnInput" class="pin-input" style="text-align:left;letter-spacing:normal;font-size:13px;margin-bottom:0;">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--ink-dim);display:block;margin-bottom:4px;">Nama Item</label>
+        <input type="text" id="editNameInput" class="pin-input" style="text-align:left;letter-spacing:normal;font-size:13px;margin-bottom:0;">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--ink-dim);display:block;margin-bottom:4px;">Password Edit</label>
+        <input type="password" id="editPassInput" class="pin-input" placeholder="Masukkan password" style="text-align:left;letter-spacing:normal;margin-bottom:0;">
+      </div>
+    </div>
+    <div class="pin-error" id="editIdentityError"></div>
+    <button class="pin-btn" id="editIdentitySaveBtn">Simpan Perubahan</button>
+    <button class="pin-skip" id="editIdentityCancelBtn">Batal</button>
+  </div>
+</div>
+
 <!-- CREATOR AVATAR -->
 <div class="creator-avatar">
   <div class="theme-toggle">
@@ -401,7 +426,7 @@ table.cat-table td.pn{font-family:'JetBrains Mono';color:var(--teal);}
         Katalog
         <span class="count-pill" id="navCatCount">—</span>
       </button>
-      <button class="tab-btn nav-editor-only" data-page="upload">
+      <button class="tab-btn" data-page="upload">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 21h14"/></svg>
         Update Data (Excel)
       </button>
@@ -645,6 +670,10 @@ table.cat-table td.pn{font-family:'JetBrains Mono';color:var(--teal);}
       </div>
       <div class="detail-grid" id="modalDetailGrid"></div>
 
+      <div style="margin-top:10px;text-align:right;">
+        <button class="btn ghost small" id="editIdentityBtn" style="font-size:11px;">✏️ Koreksi PN / Nama Item</button>
+      </div>
+
       <!-- RIWAYAT PERUBAHAN STOK -->
       <div style="margin-top:16px;border-top:1px solid var(--line);padding-top:14px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
@@ -806,6 +835,52 @@ document.getElementById('pinInput').addEventListener('keydown',e=>{ if(e.key==='
 document.getElementById('pinSkipBtn').addEventListener('click',()=>{ setEditorMode(false); hidePinModal(); });
 document.getElementById('pinSkipBtn').addEventListener('touchend',(e)=>{ e.preventDefault(); setEditorMode(false); hidePinModal(); });
 document.getElementById('pinSubmitBtn').addEventListener('touchend',(e)=>{ e.preventDefault(); document.getElementById('pinSubmitBtn').click(); });
+
+/* ---------- Koreksi PN / Nama Item (password terpisah, bukan PIN editor) ---------- */
+document.getElementById('editIdentityBtn').addEventListener('click', ()=>{
+  if(!activeModalKey) return;
+  document.getElementById('editPnInput').value = activeModalKey;
+  document.getElementById('editNameInput').value = document.getElementById('modalItemName').textContent;
+  document.getElementById('editPassInput').value = '';
+  document.getElementById('editIdentityError').textContent = '';
+  document.getElementById('editIdentityOverlay').classList.remove('hidden');
+  document.getElementById('editPnInput').focus();
+});
+document.getElementById('editIdentityCancelBtn').addEventListener('click', ()=>{
+  document.getElementById('editIdentityOverlay').classList.add('hidden');
+});
+document.getElementById('editIdentitySaveBtn').addEventListener('click', async ()=>{
+  const oldPn   = activeModalKey;
+  const newPn   = document.getElementById('editPnInput').value.trim();
+  const newName = document.getElementById('editNameInput').value.trim();
+  const pass    = document.getElementById('editPassInput').value;
+  const errBox  = document.getElementById('editIdentityError');
+  if(!newPn || !newName){ errBox.textContent='PN dan Nama Item wajib diisi.'; return; }
+  if(!pass){ errBox.textContent='Masukkan password edit.'; return; }
+  const btn = document.getElementById('editIdentitySaveBtn');
+  btn.disabled = true; btn.textContent = 'Menyimpan...';
+  try{
+    const { data, error } = await sb.rpc('edit_item_identity', {
+      p_old_stock_code: oldPn, p_new_stock_code: newPn, p_new_item_name: newName, p_pass: pass
+    });
+    if(error) throw error;
+    if(!data || !data.success){
+      errBox.textContent = (data && data.message) || 'Gagal menyimpan perubahan.';
+    } else {
+      document.getElementById('editIdentityOverlay').classList.add('hidden');
+      const finalPn = data.new_stock_code || newPn;
+      imgCache.delete(oldPn);
+      await loadImageIndex();
+      await openModal(finalPn);
+      if(katalogView==='visual'){ fetchVisualPage(); } else { fetchKatalogPage(); }
+      loadDashboard();
+    }
+  }catch(e){
+    errBox.textContent = 'Error: '+e.message;
+  }
+  btn.disabled = false; btn.textContent = 'Simpan Perubahan';
+});
+document.getElementById('editPassInput').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('editIdentitySaveBtn').click(); });
 
 /* ---------- navigation ---------- */
 document.querySelectorAll('.tab-btn').forEach(btn=>{
