@@ -393,6 +393,48 @@ table.cat-table td.pn{font-family:'JetBrains Mono';color:var(--teal);}
   </div>
 </div>
 
+<!-- TAMBAH ITEM BARU OVERLAY -->
+<div class="pin-overlay hidden" id="addItemOverlay">
+  <div class="pin-box" style="max-width:460px;">
+    <h2>Tambah Item Baru</h2>
+    <p>Tambahkan item baru secara manual ke katalog.</p>
+    <div style="text-align:left;display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+      <div style="grid-column:1/-1;">
+        <label style="font-size:11px;color:var(--ink-dim);display:block;margin-bottom:4px;">PN (Stock Code) *</label>
+        <input type="text" id="addPnInput" class="pin-input" style="text-align:left;letter-spacing:normal;font-size:13px;margin-bottom:0;">
+      </div>
+      <div style="grid-column:1/-1;">
+        <label style="font-size:11px;color:var(--ink-dim);display:block;margin-bottom:4px;">Nama Item *</label>
+        <input type="text" id="addNameInput" class="pin-input" style="text-align:left;letter-spacing:normal;font-size:13px;margin-bottom:0;">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--ink-dim);display:block;margin-bottom:4px;">Qty</label>
+        <input type="number" id="addQtyInput" class="pin-input" value="0" style="text-align:left;letter-spacing:normal;font-size:13px;margin-bottom:0;">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--ink-dim);display:block;margin-bottom:4px;">Satuan</label>
+        <input type="text" id="addUoiInput" class="pin-input" placeholder="EACH" style="text-align:left;letter-spacing:normal;font-size:13px;margin-bottom:0;">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--ink-dim);display:block;margin-bottom:4px;">Merk</label>
+        <input type="text" id="addMerkInput" class="pin-input" style="text-align:left;letter-spacing:normal;font-size:13px;margin-bottom:0;">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--ink-dim);display:block;margin-bottom:4px;">Part of</label>
+        <input type="text" id="addPartOfInput" class="pin-input" style="text-align:left;letter-spacing:normal;font-size:13px;margin-bottom:0;">
+      </div>
+      <div style="grid-column:1/-1;">
+        <label style="font-size:11px;color:var(--ink-dim);display:block;margin-bottom:4px;">Klasifikasi</label>
+        <input type="text" id="addKlasInput" class="pin-input" list="addKlasList" style="text-align:left;letter-spacing:normal;font-size:13px;margin-bottom:0;">
+        <datalist id="addKlasList"></datalist>
+      </div>
+    </div>
+    <div class="pin-error" id="addItemError"></div>
+    <button class="pin-btn" id="addItemSaveBtn">Simpan Item</button>
+    <button class="pin-skip" id="addItemCancelBtn">Batal</button>
+  </div>
+</div>
+
 <!-- CREATOR AVATAR -->
 <div class="creator-avatar">
   <div class="theme-toggle">
@@ -487,9 +529,15 @@ table.cat-table td.pn{font-family:'JetBrains Mono';color:var(--teal);}
     <section class="page" id="page-katalog">
       <div class="page-head">
         <div><div class="eyebrow">Master Data</div><h1>Katalog Stock</h1><p>Cari, filter, dan urutkan seluruh item inventory.</p></div>
-        <div class="mode-toggle" id="katalogViewToggle">
-          <button type="button" class="mode-opt active" data-view="tabel">▤ Tabel</button>
-          <button type="button" class="mode-opt" data-view="visual">▦ Visual</button>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <button class="btn small" id="addItemBtn" style="background:var(--teal);color:#F5F9FF;display:flex;align-items:center;gap:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Tambah Item
+          </button>
+          <div class="mode-toggle" id="katalogViewToggle">
+            <button type="button" class="mode-opt active" data-view="tabel">▤ Tabel</button>
+            <button type="button" class="mode-opt" data-view="visual">▦ Visual</button>
+          </div>
         </div>
       </div>
 
@@ -881,6 +929,64 @@ document.getElementById('editIdentitySaveBtn').addEventListener('click', async (
   btn.disabled = false; btn.textContent = 'Simpan Perubahan';
 });
 document.getElementById('editPassInput').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('editIdentitySaveBtn').click(); });
+
+/* ---------- Tambah Item Baru (manual, butuh mode editor / PIN) ---------- */
+document.getElementById('addItemBtn').addEventListener('click', async ()=>{
+  if(!isEditor){ showPinModal(); return; }
+  document.getElementById('addPnInput').value = '';
+  document.getElementById('addNameInput').value = '';
+  document.getElementById('addQtyInput').value = '0';
+  document.getElementById('addUoiInput').value = '';
+  document.getElementById('addMerkInput').value = '';
+  document.getElementById('addPartOfInput').value = '';
+  document.getElementById('addKlasInput').value = '';
+  document.getElementById('addItemError').textContent = '';
+  try{
+    await loadFilterOptions();
+    document.getElementById('addKlasList').innerHTML = klasifikasiOptions.map(k=>`<option value="${esc(k)}"></option>`).join('');
+  }catch(e){}
+  document.getElementById('addItemOverlay').classList.remove('hidden');
+  document.getElementById('addPnInput').focus();
+});
+document.getElementById('addItemCancelBtn').addEventListener('click', ()=>{
+  document.getElementById('addItemOverlay').classList.add('hidden');
+});
+document.getElementById('addItemSaveBtn').addEventListener('click', async ()=>{
+  const pn     = document.getElementById('addPnInput').value.trim();
+  const name   = document.getElementById('addNameInput').value.trim();
+  const qty    = parseFloat(document.getElementById('addQtyInput').value) || 0;
+  const uoi    = document.getElementById('addUoiInput').value.trim();
+  const merk   = document.getElementById('addMerkInput').value.trim();
+  const partOf = document.getElementById('addPartOfInput').value.trim();
+  const klas   = document.getElementById('addKlasInput').value.trim();
+  const errBox = document.getElementById('addItemError');
+  if(!pn || !name){ errBox.textContent = 'PN dan Nama Item wajib diisi.'; return; }
+  const btn = document.getElementById('addItemSaveBtn');
+  btn.disabled = true; btn.textContent = 'Menyimpan...';
+  try{
+    const { error } = await sb.from('items').insert({
+      stock_code: pn, item_name: name, qty: qty, uoi: uoi, merk: merk, part_of: partOf, klasifikasi: klas
+    });
+    if(error){
+      if(error.code === '23505' || /duplicate/i.test(error.message)){
+        errBox.textContent = 'PN sudah dipakai item lain. Gunakan PN yang berbeda.';
+      } else {
+        errBox.textContent = 'Gagal menyimpan: ' + error.message;
+      }
+    } else {
+      document.getElementById('addItemOverlay').classList.add('hidden');
+      await Promise.all([loadFilterOptions(), loadDashboard()]);
+      if(document.getElementById('page-katalog').classList.contains('active')){
+        if(katalogView==='visual'){ populateVisualFilterSelects(); fetchVisualPage(); }
+        else { populateFilterSelects(); fetchKatalogPage(); }
+      }
+    }
+  }catch(e){
+    errBox.textContent = 'Error: ' + e.message;
+  }
+  btn.disabled = false; btn.textContent = 'Simpan Item';
+});
+document.getElementById('addPartOfInput').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('addItemSaveBtn').click(); });
 
 /* ---------- navigation ---------- */
 document.querySelectorAll('.tab-btn').forEach(btn=>{
